@@ -15,12 +15,6 @@ public class KafkaProducerService {
     }
 
 
-
-    @KafkaListener(id = "kinesis-listener", topics = "data-injest", groupId = "kinesis-group")
-    public void listen(cryptoEvent in) {
-        System.out.println("Mensaje recibido: "+in);
-    }
-
     public void send(cryptoEvent event) {
         String topic =  "data-injest";
         kafkaTemplate.send(topic, event);
