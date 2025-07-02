@@ -4,15 +4,26 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d483ce6d-440c-4168-a45c-3ac57b477076" name="Changes" comment="implemented serialization and desarialization of both the consumer and the producer- &amp;&amp; added a service and a controller layer, the controller has a post handler that acts as a producer">
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/controller/AlertController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/model/Alert.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/repository/AlertRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/AlertService.java" afterDir="false" />
+    <list default="true" id="d483ce6d-440c-4168-a45c-3ac57b477076" name="Changes" comment="added a postgresql on docker compose &amp;&amp; added an alert table, and a controller">
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/controller/SimulatedDataProducer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/dto/AlertDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/mapper/AlertMapper.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/org/example/kinesisflow/AlertControllerIntegrationTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/org/example/kinesisflow/KafkaProducerConsumerIntegrationTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/infrastructure/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/infrastructure/docker-compose.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/KinesisFlowApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/KinesisFlowApplication.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/config/KafkaConsumerConfig.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/config/KafkaProducerConfig.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/controller/AlertController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/controller/AlertController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/controller/IngestController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/controller/IngestController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/model/Alert.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/model/Alert.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/record/cryptoEvent.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/record/cryptoEvent.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/KafkaConsumerService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/KafkaConsumerService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/KafkaProducerService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/KafkaProducerService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/org/example/kinesisflow/KinesisFlowApplicationTests.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/org/example/kinesisflow/KinesisFlowApplicationTests.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -64,8 +75,17 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "Application.KinesisFlowApplication.executor": "Run",
+    "Docker.infrastructure.kafka-ui: Compose Deployment.executor": "Run",
+    "Docker.infrastructure.kafka: Compose Deployment.executor": "Run",
     "Docker.infrastructure.postgres: Compose Deployment.executor": "Run",
+    "Docker.infrastructure.zookeeper: Compose Deployment.executor": "Run",
     "Docker.infrastructure: Compose Deployment.executor": "Run",
+    "JUnit.AlertControllerIntegrationTest.executor": "Run",
+    "JUnit.AlertCreationIntegrationTest.executor": "Run",
+    "JUnit.AlertServiceTest.executor": "Run",
+    "JUnit.KafkaFlowIntegrationTest.executor": "Run",
+    "JUnit.KafkaProducerConsumerIntegrationTest.executor": "Run",
+    "JUnit.KafkaProducerExampleApplicationTests.executor": "Run",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RequestMappingsPanelOrder0": "0",
     "RequestMappingsPanelOrder1": "1",
@@ -76,6 +96,7 @@
     "Spring Boot.KinesisFlowApplication.executor": "Run",
     "git-widget-placeholder": "main",
     "ignore.virus.scanning.warn.message": "true",
+    "last_directory_selection": "C:/Users/Ouail/Documents/proyectos/kinesisFlow/src/test/java",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -90,7 +111,45 @@
     ]
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Ouail\Documents\proyectos\kinesisFlow\src\main\resources" />
+    </key>
+    <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
+      <recent name="org.example.kinesisflow" />
+    </key>
+  </component>
   <component name="RunManager" selected="Spring Boot.KinesisFlowApplication">
+    <configuration name="AlertControllerIntegrationTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="kinesisFlow" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.example.kinesisflow.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="org.example.kinesisflow" />
+      <option name="MAIN_CLASS_NAME" value="org.example.kinesisflow.AlertControllerIntegrationTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="KafkaProducerConsumerIntegrationTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="kinesisFlow" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.example.kinesisflow.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="org.example.kinesisflow" />
+      <option name="MAIN_CLASS_NAME" value="org.example.kinesisflow.KafkaProducerConsumerIntegrationTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="KinesisFlowApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
       <module name="kinesisFlow" />
@@ -113,23 +172,11 @@
       </deployment>
       <method v="2" />
     </configuration>
-    <configuration name="infrastructure.postgres: Compose Deployment" type="docker-deploy" factoryName="docker-compose.yml" temporary="true" server-name="Docker">
-      <deployment type="docker-compose.yml">
-        <settings>
-          <option name="services">
-            <list>
-              <option value="postgres" />
-            </list>
-          </option>
-          <option name="sourceFilePath" value="infrastructure/docker-compose.yml" />
-        </settings>
-      </deployment>
-      <method v="2" />
-    </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Docker.infrastructure.postgres: Compose Deployment" />
+        <item itemvalue="JUnit.KafkaProducerConsumerIntegrationTest" />
         <item itemvalue="Docker.infrastructure: Compose Deployment" />
+        <item itemvalue="JUnit.AlertControllerIntegrationTest" />
       </list>
     </recent_temporary>
   </component>
@@ -150,7 +197,9 @@
       <updated>1751297972185</updated>
       <workItem from="1751297973621" duration="285000" />
       <workItem from="1751301696420" duration="1776000" />
-      <workItem from="1751364400961" duration="13347000" />
+      <workItem from="1751364400961" duration="16303000" />
+      <workItem from="1751451438438" duration="16324000" />
+      <workItem from="1751473523169" duration="14246000" />
     </task>
     <task id="LOCAL-00001" summary="created docker compose for kafka + tested creating a topic">
       <option name="closed" value="true" />
@@ -168,7 +217,15 @@
       <option name="project" value="LOCAL" />
       <updated>1751373945911</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="added a postgresql on docker compose &amp;&amp; added an alert table, and a controller">
+      <option name="closed" value="true" />
+      <created>1751386065019</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1751386065019</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -177,7 +234,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="created docker compose for kafka + tested creating a topic" />
     <MESSAGE value="implemented serialization and desarialization of both the consumer and the producer- &amp;&amp; added a service and a controller layer, the controller has a post handler that acts as a producer" />
-    <option name="LAST_COMMIT_MESSAGE" value="implemented serialization and desarialization of both the consumer and the producer- &amp;&amp; added a service and a controller layer, the controller has a post handler that acts as a producer" />
+    <MESSAGE value="added a postgresql on docker compose &amp;&amp; added an alert table, and a controller" />
+    <option name="LAST_COMMIT_MESSAGE" value="added a postgresql on docker compose &amp;&amp; added an alert table, and a controller" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

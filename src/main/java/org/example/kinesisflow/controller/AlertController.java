@@ -1,11 +1,15 @@
 package org.example.kinesisflow.controller;
 
+import org.example.kinesisflow.dto.AlertDTO;
+import org.example.kinesisflow.mapper.AlertMapper;
 import org.example.kinesisflow.model.Alert;
 import org.example.kinesisflow.service.AlertService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/alerts")
@@ -18,29 +22,37 @@ public class AlertController {
     }
 
     @GetMapping
-    public List<Alert> getAllAlerts() {
-        return alertService.findAll();
+    public List<AlertDTO> getAllAlerts() {
+        return alertService.findAll().stream()
+                .map(AlertMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Alert> getAlertById(@PathVariable Long id) {
+    public ResponseEntity<AlertDTO> getAlertById(@PathVariable Long id) {
         return alertService.findById(id)
+                .map(AlertMapper::toDTO)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public Alert createAlert(@RequestBody Alert alert) {
-        return alertService.save(alert);
+    @ResponseStatus(HttpStatus.CREATED)
+    public AlertDTO createAlert(@RequestBody AlertDTO alertDTO) {
+        Alert alert = AlertMapper.fromDTO(alertDTO);
+        Alert saved = alertService.save(alert);
+        return AlertMapper.toDTO(saved);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Alert> updateAlert(@PathVariable Long id, @RequestBody Alert alertDetails) {
+    public ResponseEntity<AlertDTO> updateAlert(@PathVariable Long id, @RequestBody AlertDTO alertDTO) {
         return alertService.findById(id)
-                .map(alert -> {
-                    alert.setAsset(alertDetails.getAsset());
-                    alert.setPrice(alertDetails.getPrice());
-                    return ResponseEntity.ok(alertService.save(alert));
+                .map(existingAlert -> {
+                    existingAlert.setAsset(alertDTO.getAsset());
+                    existingAlert.setPrice(alertDTO.getPrice());
+                    existingAlert.setComparisonType(alertDTO.getComparisonType());
+                    Alert updated = alertService.save(existingAlert);
+                    return ResponseEntity.ok(AlertMapper.toDTO(updated));
                 })
                 .orElse(ResponseEntity.notFound().build());
     }

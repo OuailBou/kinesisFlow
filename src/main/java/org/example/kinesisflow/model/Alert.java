@@ -1,9 +1,6 @@
 package org.example.kinesisflow.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -20,12 +17,14 @@ public class Alert {
 
     private String asset;
 
+    // Guardamos -1, 0, 1 directamente
+    private int comparisonType;
+
     public Alert() {}
 
-    public Alert(BigDecimal price, String asset) {
+    public Alert(BigDecimal price, String asset, int comparisonType) {
         this.price = price;
         this.asset = asset;
+        this.comparisonType = comparisonType;
     }
-
-
 }
