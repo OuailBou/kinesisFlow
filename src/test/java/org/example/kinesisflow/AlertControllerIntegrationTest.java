@@ -199,4 +199,54 @@ class AlertControllerIntegrationTest {
         mockMvc.perform(delete("/alerts/{id}", 9999L))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    @DisplayName("Create alert returns 400 when asset is blank")
+    void createAlert_shouldReturnBadRequest_whenAssetIsBlank() throws Exception {
+        Alert alert = new Alert();
+        alert.setAsset(""); // Invalid: blank
+        alert.setPrice(new BigDecimal("50000.00"));
+        alert.setComparisonType(1);
+
+        String alertJson = objectMapper.writeValueAsString(alert);
+
+        mockMvc.perform(post("/alerts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(alertJson))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Create alert returns 400 when price is negative")
+    void createAlert_shouldReturnBadRequest_whenPriceIsNegative() throws Exception {
+        Alert alert = new Alert();
+        alert.setAsset("BTC");
+        alert.setPrice(new BigDecimal("-100.00")); // Invalid: negative price
+        alert.setComparisonType(1);
+
+        String alertJson = objectMapper.writeValueAsString(alert);
+
+        mockMvc.perform(post("/alerts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(alertJson))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Create alert returns 400 when comparisonType is invalid")
+    void createAlert_shouldReturnBadRequest_whenComparisonTypeInvalid() throws Exception {
+        Alert alert = new Alert();
+        alert.setAsset("BTC");
+        alert.setPrice(new BigDecimal("40000.00"));
+        alert.setComparisonType(3); // Invalid: not 0 or 1
+
+        String alertJson = objectMapper.writeValueAsString(alert);
+
+        mockMvc.perform(post("/alerts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(alertJson))
+                .andExpect(status().isBadRequest());
+
+    }
+
 }

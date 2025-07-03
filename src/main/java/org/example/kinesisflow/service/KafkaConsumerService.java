@@ -23,6 +23,7 @@ public class KafkaConsumerService {
     @KafkaListener(id = "kinesis-listener", topics = "data-injest", groupId = "kinesis-group")
     public void listen(cryptoEvent in) {
         log.info("message received {}", in);
+        //ONLY FOR TESTING
         this.alertRepository.save(new Alert(new BigDecimal(500), "SOL", -1));
         this.alertRepository.save(new Alert(new BigDecimal(500), "SOL", 1));
 

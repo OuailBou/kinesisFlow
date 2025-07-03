@@ -1,5 +1,6 @@
 package org.example.kinesisflow.controller;
 
+import jakarta.validation.Valid;
 import org.example.kinesisflow.dto.AlertDTO;
 import org.example.kinesisflow.mapper.AlertMapper;
 import org.example.kinesisflow.model.Alert;
@@ -38,14 +39,14 @@ public class AlertController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public AlertDTO createAlert(@RequestBody AlertDTO alertDTO) {
+    public AlertDTO createAlert(@RequestBody @Valid AlertDTO alertDTO) {
         Alert alert = AlertMapper.fromDTO(alertDTO);
         Alert saved = alertService.save(alert);
         return AlertMapper.toDTO(saved);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<AlertDTO> updateAlert(@PathVariable Long id, @RequestBody AlertDTO alertDTO) {
+    public ResponseEntity<AlertDTO> updateAlert(@PathVariable Long id, @RequestBody @Valid AlertDTO alertDTO) {
         return alertService.findById(id)
                 .map(existingAlert -> {
                     existingAlert.setAsset(alertDTO.getAsset());

@@ -6,6 +6,7 @@ import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
+//@EnableScheduling
 @EnableKafka
 public class KinesisFlowApplication {
 
