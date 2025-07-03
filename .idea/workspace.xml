@@ -4,15 +4,19 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d483ce6d-440c-4168-a45c-3ac57b477076" name="Changes" comment="Add full Kafka integration test, alert DTO, and controller test and logs&#10;&#10;- Introduced a complete integration test covering the main data flow from Kafka message production to its consumption and processing by the consumer service.&#10;- Used Testcontainers to spin up isolated Kafka and PostgreSQL instances for portable, environment-independent testing.&#10;- Fixed a critical race condition on test startup by synchronizing the test thread with the Kafka listener using a `@BeforeEach` block, `KafkaListenerEndpointRegistry`, and Awaitility.&#10;&#10;- Added Alert DTO.&#10;- Added and tested AlertController.">
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/exception/ValidationExceptionHandler.java" afterDir="false" />
+    <list default="true" id="d483ce6d-440c-4168-a45c-3ac57b477076" name="Changes" comment="dto validation and error handling">
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/config/AppConfig.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/config/SecurityConfig.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/controller/UserController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/filter/JwtAuthFilter.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/model/AuthRequest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/model/UserInfo.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/repository/UserInfoRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/JwtService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/UserInfoDetails.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/UserInfoService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/KinesisFlowApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/KinesisFlowApplication.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/controller/AlertController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/controller/AlertController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/dto/AlertDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/dto/AlertDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/KafkaConsumerService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/KafkaConsumerService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/org/example/kinesisflow/AlertControllerIntegrationTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/org/example/kinesisflow/AlertControllerIntegrationTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -108,7 +112,7 @@
       <recent name="org.example.kinesisflow" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.AlertControllerIntegrationTest">
+  <component name="RunManager" selected="Spring Boot.KinesisFlowApplication">
     <configuration name="AlertControllerIntegrationTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="kinesisFlow" />
       <extension name="coverage">
@@ -189,7 +193,7 @@
       <workItem from="1751364400961" duration="16303000" />
       <workItem from="1751451438438" duration="16324000" />
       <workItem from="1751473523169" duration="14764000" />
-      <workItem from="1751534009664" duration="2035000" />
+      <workItem from="1751534009664" duration="8257000" />
     </task>
     <task id="LOCAL-00001" summary="created docker compose for kafka + tested creating a topic">
       <option name="closed" value="true" />
@@ -223,7 +227,15 @@
       <option name="project" value="LOCAL" />
       <updated>1751493591289</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="dto validation and error handling">
+      <option name="closed" value="true" />
+      <created>1751541154031</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1751541154031</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -234,7 +246,8 @@
     <MESSAGE value="implemented serialization and desarialization of both the consumer and the producer- &amp;&amp; added a service and a controller layer, the controller has a post handler that acts as a producer" />
     <MESSAGE value="added a postgresql on docker compose &amp;&amp; added an alert table, and a controller" />
     <MESSAGE value="Add full Kafka integration test, alert DTO, and controller test and logs&#10;&#10;- Introduced a complete integration test covering the main data flow from Kafka message production to its consumption and processing by the consumer service.&#10;- Used Testcontainers to spin up isolated Kafka and PostgreSQL instances for portable, environment-independent testing.&#10;- Fixed a critical race condition on test startup by synchronizing the test thread with the Kafka listener using a `@BeforeEach` block, `KafkaListenerEndpointRegistry`, and Awaitility.&#10;&#10;- Added Alert DTO.&#10;- Added and tested AlertController." />
-    <option name="LAST_COMMIT_MESSAGE" value="Add full Kafka integration test, alert DTO, and controller test and logs&#10;&#10;- Introduced a complete integration test covering the main data flow from Kafka message production to its consumption and processing by the consumer service.&#10;- Used Testcontainers to spin up isolated Kafka and PostgreSQL instances for portable, environment-independent testing.&#10;- Fixed a critical race condition on test startup by synchronizing the test thread with the Kafka listener using a `@BeforeEach` block, `KafkaListenerEndpointRegistry`, and Awaitility.&#10;&#10;- Added Alert DTO.&#10;- Added and tested AlertController." />
+    <MESSAGE value="dto validation and error handling" />
+    <option name="LAST_COMMIT_MESSAGE" value="dto validation and error handling" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
