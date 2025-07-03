@@ -1,6 +1,5 @@
-package org.example.kinesisflow.controller;
+package org.example.kinesisflow.service;
 import org.example.kinesisflow.record.cryptoEvent;
-import org.example.kinesisflow.service.KafkaProducerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +18,6 @@ public class SimulatedDataProducer {
     private final KafkaProducerService kafkaProducerService;
     private final Random random = new Random();
 
-    // Usamos AtomicReference para poder modificar el precio de forma thread-safe
     private final AtomicReference<BigDecimal> btcPrice = new AtomicReference<>(new BigDecimal("68000.00"));
     private final AtomicReference<BigDecimal> ethPrice = new AtomicReference<>(new BigDecimal("3500.00"));
 

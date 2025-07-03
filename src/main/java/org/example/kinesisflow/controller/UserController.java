@@ -1,53 +1,50 @@
 package org.example.kinesisflow.controller;
-
-import lombok.RequiredArgsConstructor;
-import org.example.kinesisflow.model.AuthRequest;
-import org.example.kinesisflow.model.UserInfo;
+import jakarta.validation.Valid;
+import org.example.kinesisflow.dto.UserDTO;
+import org.example.kinesisflow.mapper.UserMapper;
+import org.example.kinesisflow.model.User;
 import org.example.kinesisflow.service.JwtService;
-import org.example.kinesisflow.service.UserInfoService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.example.kinesisflow.service.UserService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
-@RequiredArgsConstructor
 public class UserController {
 
-    @Autowired
-    private UserInfoService service;
+    private final UserService userService;
+    private final JwtService jwtService;
+    private final AuthenticationManager authenticationManager;
 
-    @Autowired
-    private JwtService jwtService;
-
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @GetMapping("/welcome")
-    public String welcome() {
-        return "Welcome this endpoint is not secure";
+    public UserController(UserService userService, JwtService jwtService, AuthenticationManager authenticationManager) {
+        this.userService = userService;
+        this.jwtService = jwtService;
+        this.authenticationManager = authenticationManager;
     }
+
 
     @PostMapping("/addNewUser")
-    public String addNewUser(@RequestBody UserInfo userInfo) {
-        return this.service.addUser(userInfo);
+    @ResponseStatus(HttpStatus.CREATED)
+    public String addNewUser(@RequestBody @Valid UserDTO userDTO) {
+        User user = UserMapper.toEntity(userDTO);
+        return this.userService.addUser(user);
     }
 
-    // Removed the role checks here as they are already managed in SecurityConfig
-
-    @PostMapping("/generateToken")
-    public String authenticateAndGetToken(@RequestBody AuthRequest authRequest) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword())
-        );
-        if (authentication.isAuthenticated()) {
-            return jwtService.generateToken(authRequest.getUsername());
-        } else {
-            throw new UsernameNotFoundException("Invalid user request!");
+    @PostMapping("/authenticate")
+    public ResponseEntity<String> authenticateAndGetToken(@RequestBody @Valid UserDTO userDTO) {
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(userDTO.getUsername(), userDTO.getPassword())
+            );
+            String token = jwtService.generateToken(authentication.getName());
+            return ResponseEntity.ok(token);
+        } catch (BadCredentialsException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Invalid username or password");
         }
-    }
-}
+}}

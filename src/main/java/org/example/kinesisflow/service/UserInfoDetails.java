@@ -1,27 +1,20 @@
 package org.example.kinesisflow.service;
-
-import org.example.kinesisflow.model.UserInfo;
+import org.example.kinesisflow.model.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class UserInfoDetails implements UserDetails {
 
-    private String username; // Changed from 'name' to 'email' for clarity
+    private String username;
     private String password;
     private List<GrantedAuthority> authorities;
 
-    public UserInfoDetails(UserInfo userInfo) {
-        this.username = userInfo.getEmail(); // Use email as username
-        this.password = userInfo.getPassword();
-        this.authorities = List.of(userInfo.getRoles().split(","))
-                .stream()
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
+    public UserInfoDetails(User user) {
+        this.username = user.getUsername();
+        this.password = user.getPassword();
+        this.authorities = List.of();
     }
 
     @Override

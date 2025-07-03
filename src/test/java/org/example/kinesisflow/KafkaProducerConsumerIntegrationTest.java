@@ -2,7 +2,6 @@ package org.example.kinesisflow;
 
 import org.example.kinesisflow.record.cryptoEvent;
 import org.example.kinesisflow.repository.AlertRepository;
-import org.example.kinesisflow.service.KafkaConsumerService;
 import org.example.kinesisflow.service.KafkaProducerService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,13 +11,10 @@ import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.kafka.ConfluentKafkaContainer;
-
 import java.math.BigDecimal;
-import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 import static org.testcontainers.shaded.org.awaitility.Awaitility.await;

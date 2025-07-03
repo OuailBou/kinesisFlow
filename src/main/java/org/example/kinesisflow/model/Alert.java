@@ -2,11 +2,13 @@ package org.example.kinesisflow.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
 @Data
 @Entity
+@NoArgsConstructor
 public class Alert {
 
     @Id
@@ -17,14 +19,18 @@ public class Alert {
 
     private String asset;
 
-    // Guardamos -1, 0, 1 directamente
+    // -1, 0, 1
     private int comparisonType;
 
-    public Alert() {}
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    public Alert(BigDecimal price, String asset, int comparisonType) {
+
+    public Alert(BigDecimal price, String asset, int comparisonType, User user) {
         this.price = price;
         this.asset = asset;
         this.comparisonType = comparisonType;
+        this.user = user;
     }
 }
