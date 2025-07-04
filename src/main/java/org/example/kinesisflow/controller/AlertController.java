@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -50,9 +51,16 @@ public class AlertController {
         Alert alert = AlertMapper.fromDTO(alertDTO);
         alert.setUser(user);
 
+        if (user.getAlerts() == null) {
+            user.setAlerts(new ArrayList<>(List.of(alert)));
+        } else {
+            user.getAlerts().add(alert);
+        }
+
         Alert saved = alertService.save(alert);
         return AlertMapper.toDTO(saved);
     }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<AlertDTO> updateAlert(@PathVariable Long id, @RequestBody @Valid AlertDTO alertDTO, Authentication authentication) {

@@ -3,6 +3,8 @@ import org.example.kinesisflow.model.Alert;
 import org.example.kinesisflow.model.User;
 import org.example.kinesisflow.repository.AlertRepository;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -18,7 +20,7 @@ public class AlertService {
         return alertRepository.findById(id);
     }
 
-    public Optional<Alert> findByUser(User u) {
+    public List<Alert> findByUser(User u) {
         return alertRepository.findByUser(u);
     }
 
