@@ -5,32 +5,34 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Entity
 @NoArgsConstructor
 public class Alert {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @EmbeddedId
+    private AlertId id;
 
-    private BigDecimal price;
+    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
+    @JoinTable(
+            name = "alert_user",
+            joinColumns = {
+                    @JoinColumn(name = "price", referencedColumnName = "price"),
+                    @JoinColumn(name = "asset", referencedColumnName = "asset"),
+                    @JoinColumn(name = "comparison_type", referencedColumnName = "comparisonType")
+            },
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private List<User> users = new ArrayList<>();
 
-    private String asset;
+    @Version
+    private int version;
 
-    // -1, 0, 1
-    private int comparisonType;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
-
-
-    public Alert(BigDecimal price, String asset, int comparisonType, User user) {
-        this.price = price;
-        this.asset = asset;
-        this.comparisonType = comparisonType;
-        this.user = user;
+    public Alert(BigDecimal price, String asset, int comparisonType) {
+        this.id = new AlertId(price, asset, comparisonType);
+        this.users = new ArrayList<>();
     }
 }

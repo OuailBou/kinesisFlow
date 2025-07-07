@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -24,12 +25,16 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Alert> alerts;
+    @ManyToMany(mappedBy = "users", cascade = {
+            CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH
+    })
+    private List<Alert> alerts = new ArrayList<>();
+
 
     public User(String username, String password) {
         this.username = username;
         this.password = password;
+
     }
 }
 

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class IngestController {
 
 
-    private KafkaProducerService producerService;
+    private final KafkaProducerService producerService;
 
     public IngestController(KafkaProducerService producerService) {
         this.producerService = producerService;

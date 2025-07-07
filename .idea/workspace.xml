@@ -5,17 +5,23 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d483ce6d-440c-4168-a45c-3ac57b477076" name="Changes" comment="imeplemented tests for the new controllers">
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/exception/UserAlreadyExistsException.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/test/java/org/example/kinesisflow/UserControllerIntegrationTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/model/AlertId.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/infrastructure/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/infrastructure/docker-compose.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/KinesisFlowApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/KinesisFlowApplication.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/controller/AlertController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/controller/AlertController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/controller/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/controller/UserController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/controller/IngestController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/controller/IngestController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/dto/AlertDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/dto/AlertDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/mapper/AlertMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/mapper/AlertMapper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/model/Alert.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/model/Alert.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/model/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/model/User.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/repository/AlertRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/repository/AlertRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/repository/UserRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/repository/UserRepository.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/AlertService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/AlertService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/UserService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/org/example/kinesisflow/AlertControllerIntegrationTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/org/example/kinesisflow/AlertControllerIntegrationTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/KafkaConsumerService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/KafkaConsumerService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/org/example/kinesisflow/AlertControllerIntegrationTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/org/example/kinesisflow/UserControllerIntegrationTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/org/example/kinesisflow/UserControllerIntegrationTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -72,48 +78,48 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Application.KinesisFlowApplication.executor": "Run",
-    "Docker.infrastructure.kafka-ui: Compose Deployment.executor": "Run",
-    "Docker.infrastructure.kafka: Compose Deployment.executor": "Run",
-    "Docker.infrastructure.postgres: Compose Deployment.executor": "Run",
-    "Docker.infrastructure.zookeeper: Compose Deployment.executor": "Run",
-    "Docker.infrastructure: Compose Deployment.executor": "Run",
-    "JUnit.AlertControllerIntegrationTest.executor": "Run",
-    "JUnit.AlertCreationIntegrationTest.executor": "Run",
-    "JUnit.AlertServiceTest.executor": "Run",
-    "JUnit.KafkaFlowIntegrationTest.executor": "Run",
-    "JUnit.KafkaProducerConsumerIntegrationTest.executor": "Run",
-    "JUnit.KafkaProducerExampleApplicationTests.executor": "Run",
-    "JUnit.UserControllerIntegrationTest.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RequestMappingsPanelOrder0": "0",
-    "RequestMappingsPanelOrder1": "1",
-    "RequestMappingsPanelWidth0": "75",
-    "RequestMappingsPanelWidth1": "75",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "Spring Boot.KinesisFlowApplication.executor": "Run",
-    "com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrary": "JUnit5",
-    "com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrarySuperClass.JUnit5": "",
-    "git-widget-placeholder": "main",
-    "ignore.virus.scanning.warn.message": "true",
-    "last_directory_selection": "C:/Users/Ouail/Documents/proyectos/kinesisFlow/src/test/java",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "onboarding.tips.debug.path": "C:/Users/Ouail/Documents/KinesisFlow/KinesisFlow/src/main/java/org/example/Main.java",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.KinesisFlowApplication.executor&quot;: &quot;Run&quot;,
+    &quot;Docker.infrastructure.kafka-ui: Compose Deployment.executor&quot;: &quot;Run&quot;,
+    &quot;Docker.infrastructure.kafka: Compose Deployment.executor&quot;: &quot;Run&quot;,
+    &quot;Docker.infrastructure.postgres: Compose Deployment.executor&quot;: &quot;Run&quot;,
+    &quot;Docker.infrastructure.zookeeper: Compose Deployment.executor&quot;: &quot;Run&quot;,
+    &quot;Docker.infrastructure: Compose Deployment.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AlertControllerIntegrationTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AlertCreationIntegrationTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AlertServiceTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.KafkaFlowIntegrationTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.KafkaProducerConsumerIntegrationTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.KafkaProducerExampleApplicationTests.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.UserControllerIntegrationTest.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;Spring Boot.KinesisFlowApplication.executor&quot;: &quot;Run&quot;,
+    &quot;com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrary&quot;: &quot;JUnit5&quot;,
+    &quot;com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrarySuperClass.JUnit5&quot;: &quot;&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_directory_selection&quot;: &quot;C:/Users/Ouail/Documents/proyectos/kinesisFlow/src/test/java&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;onboarding.tips.debug.path&quot;: &quot;C:/Users/Ouail/Documents/KinesisFlow/KinesisFlow/src/main/java/org/example/Main.java&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
-  "keyToStringList": {
-    "DatabaseDriversLRU": [
-      "postgresql"
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;postgresql&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\Ouail\Documents\proyectos\kinesisFlow\src\main\resources" />
@@ -128,7 +134,7 @@
       <recent name="org.example.kinesisflow.controller" />
     </key>
   </component>
-  <component name="RunManager" selected="Spring Boot.KinesisFlowApplication">
+  <component name="RunManager" selected="JUnit.UserControllerIntegrationTest">
     <configuration name="AlertControllerIntegrationTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="kinesisFlow" />
       <extension name="coverage">
@@ -198,8 +204,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="JUnit.AlertControllerIntegrationTest" />
         <item itemvalue="JUnit.UserControllerIntegrationTest" />
+        <item itemvalue="JUnit.AlertControllerIntegrationTest" />
         <item itemvalue="Docker.infrastructure: Compose Deployment" />
         <item itemvalue="JUnit.KafkaProducerConsumerIntegrationTest" />
       </list>
@@ -227,6 +233,8 @@
       <workItem from="1751473523169" duration="14764000" />
       <workItem from="1751534009664" duration="8318000" />
       <workItem from="1751559521555" duration="10074000" />
+      <workItem from="1751713696403" duration="4317000" />
+      <workItem from="1751888585840" duration="10919000" />
     </task>
     <task id="LOCAL-00001" summary="created docker compose for kafka + tested creating a topic">
       <option name="closed" value="true" />
@@ -276,7 +284,15 @@
       <option name="project" value="LOCAL" />
       <updated>1751553516159</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="imeplemented tests for the new controllers">
+      <option name="closed" value="true" />
+      <created>1751648548889</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1751648548889</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
