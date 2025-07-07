@@ -13,11 +13,11 @@ import java.util.Objects;
 @NoArgsConstructor
 public class AlertId implements Serializable {
 
-    private BigDecimal price;
+    private Double price;
     private String asset;
     private int comparisonType;
 
-    public AlertId(BigDecimal price, String asset, int comparisonType) {
+    public AlertId(Double price, String asset, int comparisonType) {
         this.price = price;
         this.asset = asset;
         this.comparisonType = comparisonType;

@@ -27,7 +27,7 @@ public class AlertController {
 
     @DeleteMapping("/unsubscribe")
     public ResponseEntity<Void> unsubscribeFromAlert(@RequestBody @Valid AlertDTO alertDTO, Authentication authentication) {
-        alertService.deleteAlertSubscription(alertDTO, authentication);
+        alertService.unsubscribeFromAlert(alertDTO, authentication);
         return ResponseEntity.noContent().build();
     }
 }

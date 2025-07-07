@@ -31,8 +31,24 @@ public class Alert {
     @Version
     private int version;
 
-    public Alert(BigDecimal price, String asset, int comparisonType) {
+    public Alert(Double price, String asset, int comparisonType) {
         this.id = new AlertId(price, asset, comparisonType);
         this.users = new ArrayList<>();
+    }
+    public boolean addUser(User user) {
+        if (this.users.contains(user)) {
+            return false;
+        }
+        this.users.add(user);
+
+
+        if (!user.getAlerts().contains(this)) {
+            user.getAlerts().add(this);
+        }
+        return true;
+    }
+    public void removeUser(User user) {
+        this.users.remove(user);
+        user.getAlerts().remove(this);
     }
 }
