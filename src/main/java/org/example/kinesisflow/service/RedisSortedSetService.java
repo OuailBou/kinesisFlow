@@ -1,9 +1,9 @@
 package org.example.kinesisflow.service;
 
+import org.example.kinesisflow.model.User;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
+
 
 import java.util.Set;
 
@@ -14,6 +14,13 @@ public class RedisSortedSetService {
 
     public RedisSortedSetService(RedisTemplate<String, String> redisTemplate) {
         this.redisTemplate = redisTemplate;
+    }
+
+    public String createRuleIndexKey(String asset, String type) {
+        return String.join(":", asset, type);
+    }
+    public String createRuleIndexValue(User user, Double price) {
+        return String.join(":", user.getId().toString(), price.toString());
     }
 
     public void addElement(String key, String value, Double score) {

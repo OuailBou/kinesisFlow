@@ -1,8 +1,8 @@
 package org.example.kinesisflow.service;
 
 import jakarta.persistence.OptimisticLockException;
-import org.example.kinesisflow.event.AlertCreatedEvent;
-import org.example.kinesisflow.event.AlertDeletedEvent;
+import org.example.kinesisflow.event.UserSubscribedToAlertEvent;
+import org.example.kinesisflow.event.UserUnsubscribedFromAlertEvent;
 import org.example.kinesisflow.dto.AlertDTO;
 import org.example.kinesisflow.mapper.AlertMapper;
 import org.example.kinesisflow.model.Alert;
@@ -66,11 +66,12 @@ public class AlertService {
         boolean added = alert.addUser(user);
         if (added) {
             alertRepository.save(alert);
+            eventPublisher.publishEvent(new UserSubscribedToAlertEvent(alert, user));
+
         }
 
-        if (alert.getUsers().size() == 1) {
-            eventPublisher.publishEvent(new AlertCreatedEvent(alert));
-        }
+
+
 
         return AlertMapper.toDTO(alert);
     }
@@ -93,8 +94,9 @@ public class AlertService {
             alert.removeUser(user);
             if (alert.getUsers().isEmpty()) {
                 alertRepository.delete(alert);
-                eventPublisher.publishEvent(new AlertDeletedEvent(alert));
             }
+            eventPublisher.publishEvent(new UserUnsubscribedFromAlertEvent(alert, user));
+
         }
     }
 
