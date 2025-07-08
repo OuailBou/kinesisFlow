@@ -52,31 +52,29 @@ public class AlertService {
     public AlertDTO createOrUpdateAlertSubscription(AlertDTO alertDTO, Authentication authentication) {
         User user = getAuthenticatedUser(authentication);
         AlertId alertId = AlertMapper.toId(alertDTO);
-        Alert alert = findOrCreateAlert(alertId, alertDTO);
 
-        alert.addUser(user);
+        Alert alert = alertRepository.findById(alertId).orElseGet(() -> {
+            try {
+                Alert newAlert = AlertMapper.fromDTO(alertDTO);
+                return alertRepository.save(newAlert);
+            } catch (DataIntegrityViolationException e) {
+                return alertRepository.findById(alertId)
+                        .orElseThrow(() -> new IllegalStateException("Race condition recovery failed: Alert should exist but was not found."));
+            }
+        });
 
-        AlertDTO dto = AlertMapper.toDTO(alert);
+        boolean added = alert.addUser(user);
+        if (added) {
+            alertRepository.save(alert);
+        }
 
         if (alert.getUsers().size() == 1) {
             eventPublisher.publishEvent(new AlertCreatedEvent(alert));
         }
 
-        return dto;
+        return AlertMapper.toDTO(alert);
     }
 
-    private Alert findOrCreateAlert(AlertId alertId, AlertDTO alertDTO) {
-        return alertRepository.findById(alertId).orElseGet(() -> {
-            try {
-                Alert newAlert = AlertMapper.fromDTO(alertDTO);
-                alertRepository.save(newAlert);
-                return newAlert;
-            } catch (DataIntegrityViolationException e) {
-                return this.findById(alertId)
-                        .orElseThrow(() -> new IllegalStateException("Race condition recovery failed: Alert should exist but was not found."));
-            }
-        });
-    }
 
     @Transactional
     @Retryable(
