@@ -1,8 +1,10 @@
 package org.example.kinesisflow.record;
 
 
+import java.math.BigDecimal;
+
 public record cryptoEvent(
         String asset,
-        java.math.BigDecimal price,
+        BigDecimal price,
         long timestamp
 ) {}

@@ -31,7 +31,7 @@ public class Alert {
     @Version
     private int version;
 
-    public Alert(Double price, String asset, int comparisonType) {
+    public Alert(BigDecimal price, String asset, int comparisonType) {
         this.id = new AlertId(price, asset, comparisonType);
         this.users = new ArrayList<>();
     }
