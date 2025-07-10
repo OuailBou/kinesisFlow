@@ -4,17 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d483ce6d-440c-4168-a45c-3ac57b477076" name="Changes" comment="implemented the alert engine">
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/config/KafkaDLQConfig.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/config/KafkaListenerFactoryConfig.java" afterDir="false" />
+    <list default="true" id="d483ce6d-440c-4168-a45c-3ac57b477076" name="Changes" comment="solved bugs in tests. added message queues, idempotence and DLQ">
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/config/WebSocketConfig.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/config/AppConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/config/AppConfig.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/KafkaConsumerService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/KafkaConsumerService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/KafkaProducerService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/KafkaProducerService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/org/example/kinesisflow/AlertControllerIntegrationTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/org/example/kinesisflow/AlertControllerIntegrationTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/org/example/kinesisflow/UserControllerIntegrationTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/org/example/kinesisflow/UserControllerIntegrationTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -147,7 +141,7 @@
       <recent name="org.example.kinesisflow.controller" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.UserControllerIntegrationTest">
+  <component name="RunManager" selected="JUnit.AlertControllerIntegrationTest">
     <configuration name="AlertControllerIntegrationTest$AlertSubscriptionTests" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="kinesisFlow" />
       <extension name="coverage">
@@ -241,8 +235,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="JUnit.UserControllerIntegrationTest" />
         <item itemvalue="JUnit.AlertControllerIntegrationTest" />
+        <item itemvalue="JUnit.UserControllerIntegrationTest" />
         <item itemvalue="JUnit.AlertControllerIntegrationTest$AlertSubscriptionTests" />
         <item itemvalue="JUnit.AlertControllerIntegrationTest$AlertUnsubscriptionTests.shouldHandleUnsubscriptionFromNonExistentAlert" />
         <item itemvalue="JUnit.AlertControllerIntegrationTest$AlertSubscriptionTests.shouldSubscribeToAlertAndAddToRedis" />
@@ -275,7 +269,7 @@
       <workItem from="1751888585840" duration="19480000" />
       <workItem from="1751968760348" duration="16411000" />
       <workItem from="1752053130623" duration="12853000" />
-      <workItem from="1752146280428" duration="6224000" />
+      <workItem from="1752146280428" duration="12697000" />
     </task>
     <task id="LOCAL-00001" summary="created docker compose for kafka + tested creating a topic">
       <option name="closed" value="true" />
@@ -373,7 +367,15 @@
       <option name="project" value="LOCAL" />
       <updated>1752071454129</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="solved bugs in tests. added message queues, idempotence and DLQ">
+      <option name="closed" value="true" />
+      <created>1752153775349</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1752153775349</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -392,7 +394,8 @@
     <MESSAGE value="completed the testing of the alert controller and the interaction with redis" />
     <MESSAGE value="changed the keys and values format, and added users suscription in redis" />
     <MESSAGE value="implemented the alert engine" />
-    <option name="LAST_COMMIT_MESSAGE" value="implemented the alert engine" />
+    <MESSAGE value="solved bugs in tests. added message queues, idempotence and DLQ" />
+    <option name="LAST_COMMIT_MESSAGE" value="solved bugs in tests. added message queues, idempotence and DLQ" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
