@@ -20,8 +20,8 @@ public class KafkaProducerService {
 
     public void send(cryptoEvent event) {
 
-        String topic =  "data-injest";
-        kafkaTemplate.send(topic, event);
+        String topic =  "raw-market-data";
+        kafkaTemplate.send(topic, event.asset(), event);
         log.info("message sent to topic {}", topic);
 
 

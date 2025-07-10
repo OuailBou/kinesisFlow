@@ -1,6 +1,5 @@
 package org.example.kinesisflow.service;
 import org.example.kinesisflow.record.cryptoEvent;
-import org.example.kinesisflow.repository.AlertRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -26,7 +25,7 @@ public class KafkaConsumerService {
 
     }
 
-    @KafkaListener(id = "kinesis-listener", topics = "data-injest", groupId = "kinesis-group")
+    @KafkaListener(id = "kinesis-listener", topics = "raw-market-data", groupId = "kinesis-group", concurrency = "3")
     public void listen(cryptoEvent in) {
         log.info("message received {}", in);
         Double formerPrice= redisStringService.get(in.asset());
