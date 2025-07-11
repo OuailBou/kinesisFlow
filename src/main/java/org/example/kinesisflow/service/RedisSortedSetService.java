@@ -1,9 +1,7 @@
 package org.example.kinesisflow.service;
 
 import org.example.kinesisflow.model.User;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 
 
@@ -23,7 +21,7 @@ public class RedisSortedSetService {
         return String.join(":", asset, type);
     }
     public String createRuleIndexValue(User user, BigDecimal price) {
-        return String.join(":", user.getId().toString(), price.toString());
+        return String.join(":", user.getUsername(), price.toString());
     }
 
     public void addElement(String key, String value, BigDecimal score) {

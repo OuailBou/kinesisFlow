@@ -4,11 +4,18 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d483ce6d-440c-4168-a45c-3ac57b477076" name="Changes" comment="solved bugs in tests. added message queues, idempotence and DLQ">
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/config/WebSocketConfig.java" afterDir="false" />
+    <list default="true" id="d483ce6d-440c-4168-a45c-3ac57b477076" name="Changes" comment="refactorized kafka consumer and started implementing websockets for notification">
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/config/WebSocketConfiguration.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/mapper/EventToNotificationMapper.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/record/Notification.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/MyWSHandler.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/RedisMessagePublisher.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/RedisMessageSubscriber.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/config/RedisConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/config/RedisConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/config/WebSocketConfig.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/KafkaConsumerService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/KafkaConsumerService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/RedisSortedSetService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/RedisSortedSetService.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -269,7 +276,9 @@
       <workItem from="1751888585840" duration="19480000" />
       <workItem from="1751968760348" duration="16411000" />
       <workItem from="1752053130623" duration="12853000" />
-      <workItem from="1752146280428" duration="12697000" />
+      <workItem from="1752146280428" duration="12798000" />
+      <workItem from="1752228817678" duration="8599000" />
+      <workItem from="1752243310727" duration="2703000" />
     </task>
     <task id="LOCAL-00001" summary="created docker compose for kafka + tested creating a topic">
       <option name="closed" value="true" />
@@ -375,7 +384,15 @@
       <option name="project" value="LOCAL" />
       <updated>1752153775349</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="refactorized kafka consumer and started implementing websockets for notification">
+      <option name="closed" value="true" />
+      <created>1752179985864</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1752179985864</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -395,7 +412,8 @@
     <MESSAGE value="changed the keys and values format, and added users suscription in redis" />
     <MESSAGE value="implemented the alert engine" />
     <MESSAGE value="solved bugs in tests. added message queues, idempotence and DLQ" />
-    <option name="LAST_COMMIT_MESSAGE" value="solved bugs in tests. added message queues, idempotence and DLQ" />
+    <MESSAGE value="refactorized kafka consumer and started implementing websockets for notification" />
+    <option name="LAST_COMMIT_MESSAGE" value="refactorized kafka consumer and started implementing websockets for notification" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

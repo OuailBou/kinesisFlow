@@ -1,5 +1,6 @@
 package org.example.kinesisflow.service;
 
+import org.example.kinesisflow.mapper.EventToNotificationMapper;
 import org.example.kinesisflow.record.cryptoEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,11 +20,14 @@ public class KafkaConsumerService {
 
     private final RedisStringService redisStringService;
     private final RedisSortedSetService redisSortedSetService;
+    private final RedisMessagePublisher redisMessagePublisher;
 
     public KafkaConsumerService(RedisStringService redisStringService,
-                                RedisSortedSetService redisSortedSetService) {
+                                RedisSortedSetService redisSortedSetService, RedisMessagePublisher redisMessagePublisher
+    )  {
         this.redisStringService = redisStringService;
         this.redisSortedSetService = redisSortedSetService;
+        this.redisMessagePublisher = redisMessagePublisher;
     }
 
     @KafkaListener(
@@ -122,8 +126,12 @@ public class KafkaConsumerService {
     }
 
     private void processAffectedUsers(List<String> users, cryptoEvent cryptoEvent) {
+     users.forEach(u -> redisMessagePublisher.publish("alerts", EventToNotificationMapper.mapToNotification(cryptoEvent, u)));
+
         log.info("Processing {} affected users for asset {}", users.size(), cryptoEvent.asset());
     }
+
+
 
     private void updateCurrentPrice(cryptoEvent cryptoEvent) {
         redisStringService.save(cryptoEvent.asset(), cryptoEvent.price());
