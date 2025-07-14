@@ -1,10 +1,13 @@
 package org.example.kinesisflow.service;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -19,7 +22,10 @@ import java.util.function.Function;
 public class JwtService {
 
     @Value("${SECRET}")
-    public String SECRET;
+    private String SECRET;
+
+    private static final Logger log = LoggerFactory.getLogger(JwtService.class);
+
 
     public String generateToken(String username) {
         Map<String, Object> claims = new HashMap<>();
@@ -27,6 +33,9 @@ public class JwtService {
     }
 
     private String createToken(Map<String, Object> claims, String username) {
+        if (username == null || username.isBlank()) {
+            throw new IllegalArgumentException("Username must not be null or empty");
+        }
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(username)
@@ -69,5 +78,29 @@ public class JwtService {
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    }
+
+    public Boolean validateHandshakeToken(String token) {
+        try {
+            Claims claims = extractAllClaims(token);
+            String username = claims.getSubject();
+
+            if (username == null) {
+                log.warn("JWT validation failed: username (subject) is null");
+                return false;
+            }
+
+            if (isTokenExpired(token)) {
+                log.warn("JWT validation failed: token is expired for user '{}'", username);
+                return false;
+            }
+
+            log.info("JWT validation successful for user '{}'", username);
+            return true;
+
+        } catch (JwtException | IllegalArgumentException e) {
+            log.warn("JWT validation exception: {}", e.getMessage());
+            return false;
+        }
     }
 }

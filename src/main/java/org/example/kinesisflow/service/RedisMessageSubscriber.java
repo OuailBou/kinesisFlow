@@ -11,15 +11,23 @@ import org.springframework.stereotype.Service;
 public class RedisMessageSubscriber implements MessageListener {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final NotifierWebSocketHandler  notifierWebSocketHandler;
+
+    public RedisMessageSubscriber(NotifierWebSocketHandler notifierWebSocketHandler) {
+        this.notifierWebSocketHandler = notifierWebSocketHandler;
+    }
 
 
     @Override
     public void onMessage(Message message, byte[] pattern) {
-        String json = message.toString();
+        String json = new String(message.getBody());
 
         try {
             Notification obj = objectMapper.readValue(json, Notification.class);
-            System.out.println("Object received: " + obj);
+            notifierWebSocketHandler.sendMessageToUser(obj.user(), json);
+            System.out.println("Notification: " + obj.asset() + " " + obj.price());
+
+
 
 
         } catch (Exception e) {

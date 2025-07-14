@@ -26,7 +26,7 @@ public class SimulatedDataProducer {
         this.kafkaProducerService = kafkaProducerService;
     }
 
-    @Scheduled(fixedRate = 30000)
+    @Scheduled(fixedRate = 3000)
     public void generateAndSendData() {
         // Genera un pequeño cambio aleatorio para simular la volatilidad
         BigDecimal btcChange = BigDecimal.valueOf((random.nextDouble() - 0.5) * 100); // Cambio entre -50 y +50

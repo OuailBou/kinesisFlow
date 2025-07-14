@@ -8,6 +8,8 @@ import org.example.kinesisflow.model.Alert;
 import org.springframework.context.event.EventListener;
 // import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 @Component
 public class AlertDomainEventListener {
@@ -18,14 +20,14 @@ public class AlertDomainEventListener {
         this.redisSortedSetService = redisSortedSetService;
     }
 
-    @EventListener
-    // @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    //@EventListener
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleAlertCreated(UserSubscribedToAlertEvent event) {
         processAlert(event.alert(), event.user(), true);
     }
 
-    @EventListener
-    //@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    // @EventListener
+  @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleAlertDeleted(UserUnsubscribedFromAlertEvent event) {
         processAlert(event.alert(), event.user(), false);
     }

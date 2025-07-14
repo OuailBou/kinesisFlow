@@ -126,7 +126,9 @@ public class KafkaConsumerService {
     }
 
     private void processAffectedUsers(List<String> users, cryptoEvent cryptoEvent) {
-     users.forEach(u -> redisMessagePublisher.publish("alerts", EventToNotificationMapper.mapToNotification(cryptoEvent, u)));
+        log.info(".......................................................Processing {} affected user", users.getFirst());
+
+        users.forEach(u -> redisMessagePublisher.publish("alerts", EventToNotificationMapper.mapToNotification(cryptoEvent, u)));
 
         log.info("Processing {} affected users for asset {}", users.size(), cryptoEvent.asset());
     }

@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableRetry
 @SpringBootApplication
-//@EnableScheduling
+@EnableScheduling
 @EnableKafka
 public class KinesisFlowApplication {
 
