@@ -5,14 +5,15 @@ import org.example.kinesisflow.event.UserUnsubscribedFromAlertEvent;
 import org.example.kinesisflow.model.User;
 import org.example.kinesisflow.service.RedisSortedSetService;
 import org.example.kinesisflow.model.Alert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
-// import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.event.TransactionPhase;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 @Component
 public class AlertDomainEventListener {
+
+    private static final Logger logger = LoggerFactory.getLogger(AlertDomainEventListener.class);
 
     private final RedisSortedSetService redisSortedSetService;
 
@@ -20,15 +21,19 @@ public class AlertDomainEventListener {
         this.redisSortedSetService = redisSortedSetService;
     }
 
-    //@EventListener
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    //@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @EventListener
     public void handleAlertCreated(UserSubscribedToAlertEvent event) {
+        logger.info("Received UserSubscribedToAlertEvent for alertId={} and user={}",
+                event.alert().getId(), event.user().getUsername());
         processAlert(event.alert(), event.user(), true);
     }
 
-    // @EventListener
-  @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    //@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @EventListener
     public void handleAlertDeleted(UserUnsubscribedFromAlertEvent event) {
+        logger.info("Received UserUnsubscribedFromAlertEvent for alertId={} and user={}",
+                event.alert().getId(), event.user().getUsername());
         processAlert(event.alert(), event.user(), false);
     }
 
@@ -43,10 +48,21 @@ public class AlertDomainEventListener {
                 alert.getId().getPrice()
         );
 
-        if (isCreation) {
-            redisSortedSetService.addElement(key, value, alert.getId().getPrice());
-        } else {
-            redisSortedSetService.removeElement(key, value);
+        try {
+            if (isCreation) {
+                logger.debug("Adding element to Redis sorted set. key='{}', value='{}', score={}",
+                        key, value, alert.getId().getPrice());
+                redisSortedSetService.addElement(key, value, alert.getId().getPrice());
+                logger.info("Added element to Redis sorted set successfully.");
+            } else {
+                logger.debug("Removing element from Redis sorted set. key='{}', value='{}'",
+                        key, value);
+                redisSortedSetService.removeElement(key, value);
+                logger.info("Removed element from Redis sorted set successfully.");
+            }
+        } catch (Exception e) {
+            logger.error("Error processing Redis sorted set operation for alertId={}, user={}, isCreation={}",
+                    alert.getId(), user.getUsername(), isCreation, e);
         }
     }
 }

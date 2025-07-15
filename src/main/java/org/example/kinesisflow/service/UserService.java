@@ -4,8 +4,6 @@ import org.example.kinesisflow.exception.UserAlreadyExistsException;
 import org.example.kinesisflow.model.User;
 import org.example.kinesisflow.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -43,7 +41,7 @@ public class UserService implements UserDetailsService {
     }
 
 
-    public String addUser(User user) {
+    public void addUser(User user) {
         if (repository.existsByUsername(user.getUsername())) {
             throw new UserAlreadyExistsException("User " + user.getUsername() + " already exists");
 
@@ -53,7 +51,6 @@ public class UserService implements UserDetailsService {
 
         repository.save(user);
 
-        return "User added successfully!";
     }
 
 }

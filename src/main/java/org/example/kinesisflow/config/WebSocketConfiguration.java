@@ -1,6 +1,5 @@
 package org.example.kinesisflow.config;
 
-import jakarta.annotation.PostConstruct;
 import org.example.kinesisflow.service.JwtService;
 import org.example.kinesisflow.service.NotifierWebSocketHandler;
 import org.example.kinesisflow.websocket.AuthHandshakeInterceptor;
@@ -33,10 +32,4 @@ public class WebSocketConfiguration implements WebSocketConfigurer {
                 .setAllowedOrigins("*");
     }
 
-
-
-    @Bean
-    public WebSocketHandler myHandler() {
-        return notifierWebSocketHandler;
-    }
 }

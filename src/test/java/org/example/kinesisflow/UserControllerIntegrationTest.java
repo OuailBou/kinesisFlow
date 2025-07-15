@@ -24,6 +24,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.kafka.ConfluentKafkaContainer;
 
 
+import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -40,7 +42,9 @@ class UserControllerIntegrationTest {
     @Container
     static final ConfluentKafkaContainer kafka = new ConfluentKafkaContainer("confluentinc/cp-kafka:7.4.0");
 
-
+    @Container
+    static GenericContainer<?> redis = new GenericContainer<>("redis:7-alpine")
+            .withExposedPorts(6379);
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
@@ -48,7 +52,7 @@ class UserControllerIntegrationTest {
         registry.add("spring.datasource.username", postgres::getUsername);
         registry.add("spring.datasource.password", postgres::getPassword);
         registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers);
-
+        registry.add("spring.data.redis.port", () -> redis.getMappedPort(6379));
     }
 
     @Autowired
@@ -69,7 +73,7 @@ class UserControllerIntegrationTest {
     }
 
     @Nested
-    @DisplayName("User Registration (/auth/addNewUser)")
+    @DisplayName("User Registration (/auth/users)")
     class UserRegistrationTests {
 
         @Test
@@ -82,11 +86,13 @@ class UserControllerIntegrationTest {
             String requestJson = objectMapper.writeValueAsString(userDTO);
 
             // Act
-            MvcResult result = mockMvc.perform(post("/auth/addNewUser")
+            MvcResult result = mockMvc.perform(post("/auth/users")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestJson))
                     .andExpect(status().isCreated())
-                    .andExpect(content().contentType(MediaType.TEXT_PLAIN + ";charset=UTF-8"))
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.message").value("User created"))
+                    .andExpect(jsonPath("$.username").value(username))
                     .andReturn();
 
             // Assert
@@ -106,10 +112,13 @@ class UserControllerIntegrationTest {
             String invalidJson = "{\"username\": \"\", \"password\": \"\"}";
 
             // Act & Assert
-            mockMvc.perform(post("/auth/addNewUser")
+            mockMvc.perform(post("/auth/users")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(invalidJson))
-                    .andExpect(status().isBadRequest());
+                    .andExpect(status().isBadRequest())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.username").exists())
+                    .andExpect(jsonPath("$.password").exists());
 
             assertThat(userRepository.findAll()).isEmpty();
         }
@@ -121,10 +130,12 @@ class UserControllerIntegrationTest {
             String invalidJson = "{\"username\": \"testuser\"}";
 
             // Act & Assert
-            mockMvc.perform(post("/auth/addNewUser")
+            mockMvc.perform(post("/auth/users")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(invalidJson))
-                    .andExpect(status().isBadRequest());
+                    .andExpect(status().isBadRequest())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.password").exists());
 
             assertThat(userRepository.findAll()).isEmpty();
         }
@@ -145,10 +156,12 @@ class UserControllerIntegrationTest {
             String requestJson = objectMapper.writeValueAsString(userDTO);
 
             // Act & Assert
-            mockMvc.perform(post("/auth/addNewUser")
+            mockMvc.perform(post("/auth/users")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestJson))
-                    .andExpect(status().isConflict());
+                    .andExpect(status().isConflict())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.error").value("User " + username + " already exists"));
 
             assertThat(userRepository.findAll()).hasSize(1);
         }
@@ -160,7 +173,7 @@ class UserControllerIntegrationTest {
             String malformedJson = "{\"username\": \"testuser\", \"password\":}";
 
             // Act & Assert
-            mockMvc.perform(post("/auth/addNewUser")
+            mockMvc.perform(post("/auth/users")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(malformedJson))
                     .andExpect(status().isBadRequest());
@@ -170,7 +183,7 @@ class UserControllerIntegrationTest {
     }
 
     @Nested
-    @DisplayName("User Authentication (/auth/authenticate)")
+    @DisplayName("User Authentication (/auth/login)")
     class UserAuthenticationTests {
 
         @Test
@@ -189,15 +202,19 @@ class UserControllerIntegrationTest {
             String requestJson = objectMapper.writeValueAsString(userDTO);
 
             // Act
-            MvcResult result = mockMvc.perform(post("/auth/authenticate")
+            MvcResult result = mockMvc.perform(post("/auth/login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestJson))
                     .andExpect(status().isOk())
-                    .andExpect(content().contentType(MediaType.TEXT_PLAIN + ";charset=UTF-8"))
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.token").exists())
                     .andReturn();
 
             // Assert
-            String token = result.getResponse().getContentAsString();
+            String responseBody = result.getResponse().getContentAsString();
+            Map<String, String> response = objectMapper.readValue(responseBody, Map.class);
+            String token = response.get("token");
+
             assertThat(token)
                     .isNotNull()
                     .isNotEmpty()
@@ -221,11 +238,12 @@ class UserControllerIntegrationTest {
             String requestJson = objectMapper.writeValueAsString(userDTO);
 
             // Act & Assert
-            mockMvc.perform(post("/auth/authenticate")
+            mockMvc.perform(post("/auth/login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestJson))
                     .andExpect(status().isUnauthorized())
-                    .andExpect(content().string("Invalid username or password"));
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.error").value("Invalid username or password"));
         }
 
         @Test
@@ -239,11 +257,12 @@ class UserControllerIntegrationTest {
             String requestJson = objectMapper.writeValueAsString(userDTO);
 
             // Act & Assert
-            mockMvc.perform(post("/auth/authenticate")
+            mockMvc.perform(post("/auth/login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestJson))
                     .andExpect(status().isUnauthorized())
-                    .andExpect(content().string("Invalid username or password"));
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.error").value("Invalid username or password"));
         }
 
         @Test
@@ -253,10 +272,13 @@ class UserControllerIntegrationTest {
             String invalidJson = "{\"username\": \"\", \"password\": \"\"}";
 
             // Act & Assert
-            mockMvc.perform(post("/auth/authenticate")
+            mockMvc.perform(post("/auth/login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(invalidJson))
-                    .andExpect(status().isBadRequest());
+                    .andExpect(status().isBadRequest())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.username").exists())
+                    .andExpect(jsonPath("$.password").exists());
         }
 
         @Test
@@ -266,10 +288,12 @@ class UserControllerIntegrationTest {
             String invalidJson = "{\"username\": \"testuser\"}";
 
             // Act & Assert
-            mockMvc.perform(post("/auth/authenticate")
+            mockMvc.perform(post("/auth/login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(invalidJson))
-                    .andExpect(status().isBadRequest());
+                    .andExpect(status().isBadRequest())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.password").exists());
         }
 
         @Test
@@ -279,24 +303,22 @@ class UserControllerIntegrationTest {
             String malformedJson = "{\"username\": \"testuser\", \"password\":}";
 
             // Act & Assert
-            mockMvc.perform(post("/auth/authenticate")
+            mockMvc.perform(post("/auth/login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(malformedJson))
                     .andExpect(status().isBadRequest());
         }
 
-
         @Test
         @DisplayName("Should return 400 when request body is empty")
         void shouldReturnBadRequestForEmptyBody() throws Exception {
             // Act & Assert
-            mockMvc.perform(post("/auth/authenticate")
+            mockMvc.perform(post("/auth/login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(""))
                     .andExpect(status().isBadRequest());
         }
     }
-
 
     @Nested
     @DisplayName("Complete User Journey")
@@ -312,20 +334,27 @@ class UserControllerIntegrationTest {
             String requestJson = objectMapper.writeValueAsString(userDTO);
 
             // Act - Register user
-            mockMvc.perform(post("/auth/addNewUser")
+            mockMvc.perform(post("/auth/users")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestJson))
-                    .andExpect(status().isCreated());
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.message").value("User created"))
+                    .andExpect(jsonPath("$.username").value(username));
 
             // Act - Authenticate user
-            MvcResult authResult = mockMvc.perform(post("/auth/authenticate")
+            MvcResult authResult = mockMvc.perform(post("/auth/login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestJson))
                     .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.token").exists())
                     .andReturn();
 
             // Assert
-            String token = authResult.getResponse().getContentAsString();
+            String responseBody = authResult.getResponse().getContentAsString();
+            Map<String, String> response = objectMapper.readValue(responseBody, Map.class);
+            String token = response.get("token");
+
             assertThat(token)
                     .isNotNull()
                     .isNotEmpty()
@@ -344,21 +373,23 @@ class UserControllerIntegrationTest {
             String validAuthJson = "{\"username\": \"testuser\", \"password\": \"password123\"}";
 
             // Act - Try to register with invalid data
-            mockMvc.perform(post("/auth/addNewUser")
+            mockMvc.perform(post("/auth/users")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(invalidJson))
                     .andExpect(status().isBadRequest());
 
             // Act - Try to authenticate user that wasn't created
-            mockMvc.perform(post("/auth/authenticate")
+            mockMvc.perform(post("/auth/login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(validAuthJson))
                     .andExpect(status().isUnauthorized())
-                    .andExpect(content().string("Invalid username or password"));
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.error").value("Invalid username or password"));
 
             // Assert
             assertThat(userRepository.findAll()).isEmpty();
         }
-
     }
+
+
 }

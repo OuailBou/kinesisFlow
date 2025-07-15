@@ -12,6 +12,11 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
@@ -28,23 +33,32 @@ public class UserController {
     }
 
 
-    @PostMapping("/addNewUser")
-    @ResponseStatus(HttpStatus.CREATED)
-    public String addNewUser(@RequestBody @Valid UserDTO userDTO) {
+    @PostMapping("/users")
+    public ResponseEntity<Map<String, Object>> addNewUser(@RequestBody @Valid UserDTO userDTO) {
         User user = UserMapper.toEntity(userDTO);
-        return this.userService.addUser(user);
+        userService.addUser(user);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "User created");
+        response.put("username", user.getUsername());
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PostMapping("/authenticate")
-    public ResponseEntity<String> authenticateAndGetToken(@RequestBody @Valid UserDTO userDTO) {
-        try {
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(userDTO.getUsername(), userDTO.getPassword())
-            );
-            String token = jwtService.generateToken(authentication.getName());
-            return ResponseEntity.ok(token);
-        } catch (BadCredentialsException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("Invalid username or password");
-        }
-    }}
+
+    @PostMapping("/login")
+    public ResponseEntity<Map<String, String>> authenticateAndGetToken(@RequestBody @Valid UserDTO userDTO) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(userDTO.getUsername(), userDTO.getPassword())
+        );
+        String token = jwtService.generateToken(authentication.getName());
+
+        Map<String, String> response = new HashMap<>();
+        response.put("token", token);
+
+        return ResponseEntity.ok(response);
+    }
+
+
+
+}

@@ -19,12 +19,6 @@ public class NotifierWebSocketHandler extends TextWebSocketHandler {
     private static final Logger log = LoggerFactory.getLogger(NotifierWebSocketHandler.class);
     private final Map<String, WebSocketSession> sessionsByUserId = new ConcurrentHashMap<>();
 
-    private final JwtService jwtService;
-
-    public NotifierWebSocketHandler(JwtService jwtService) {
-
-        this.jwtService = jwtService;
-    }
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
