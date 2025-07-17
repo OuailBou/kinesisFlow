@@ -2,12 +2,8 @@ package org.example.kinesisflow;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.kinesisflow.dto.AlertDTO;
-import org.example.kinesisflow.model.Alert;
-import org.example.kinesisflow.model.AlertId;
+import org.example.kinesisflow.dto.UserDTO;
 import org.example.kinesisflow.model.User;
-import org.example.kinesisflow.repository.AlertRepository;
-import org.example.kinesisflow.repository.UserRepository;
-import org.example.kinesisflow.service.JwtService;
 import org.example.kinesisflow.service.RedisSortedSetService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -17,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -30,6 +26,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.kafka.ConfluentKafkaContainer;
 
 import java.math.BigDecimal;
+import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -58,12 +55,9 @@ class AlertControllerIntegrationTest {
         registry.add("spring.datasource.url", postgres::getJdbcUrl);
         registry.add("spring.datasource.username", postgres::getUsername);
         registry.add("spring.datasource.password", postgres::getPassword);
-        registry.add("spring.data.redis.host", redis::getHost);
-        registry.add("spring.data.redis.port", () -> redis.getMappedPort(6379));
         registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers);
-
+        registry.add("spring.data.redis.port", () -> redis.getMappedPort(6379));
     }
-
     @Autowired
     private MockMvc mockMvc;
 
@@ -71,415 +65,534 @@ class AlertControllerIntegrationTest {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private AlertRepository alertRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
     private RedisSortedSetService redisSortedSetService;
 
-    @Autowired
-    private JwtService jwtService;
+    // Test Data Constants
+    private static final String TEST_USERNAME = "testuser";
+    private static final String TEST_PASSWORD = "password123";
+    private static final String TEST_ASSET = "BTC";
+    private static final BigDecimal TEST_PRICE = new BigDecimal("50000");
 
-    private User testUser;
+    // ComparisonType constants
+    private static final int GREATER_THAN = 1;
+    private static final int LESS_THAN = -1;
+    private static final int EQUAL = 0;
+
+    // API Endpoints
+    private static final String SUBSCRIBE_ENDPOINT = "/api/alerts/subscribe";
+    private static final String UNSUBSCRIBE_ENDPOINT = "/api/alerts/unsubscribe";
+    private static final String USERS_ENDPOINT = "/auth/users";
+    private static final String LOGIN_ENDPOINT = "/auth/login";
+
     private String jwtToken;
 
     @BeforeEach
-    void setup() {
-        alertRepository.deleteAll();
-        userRepository.deleteAll();
+    void setUp() throws Exception {
         redisSortedSetService.deleteAll();
-
-        testUser = createAndSaveUser("testuser", "password123");
-        jwtToken = jwtService.generateToken(testUser.getUsername());
+        createTestUser();
+        jwtToken = authenticateAndGetToken();
     }
 
-    // Helper methods - DRY principle
-    private User createAndSaveUser(String username, String password) {
-        User user = new User();
-        user.setUsername(username);
-        user.setPassword(passwordEncoder.encode(password));
-        return userRepository.save(user);
-    }
-
-    private String createRedisKey(String asset, int comparisonType) {
-        return redisSortedSetService.createRuleIndexKey(asset, String.valueOf(comparisonType));
-    }
-
-    private String createRedisValue(User user, BigDecimal price) {
-        return redisSortedSetService.createRuleIndexValue(user, price);
-    }
-
-    private AlertDTO createAlertDTO(String asset, int comparisonType, BigDecimal price) {
-        return new AlertDTO(asset, comparisonType, price);
-    }
-
-    private AlertId createAlertId(String asset, int comparisonType, BigDecimal price) {
-        return new AlertId(price, asset, comparisonType);
-    }
-
-    private MvcResult performSubscribe(String token, AlertDTO alertDTO) throws Exception {
-        return mockMvc.perform(post("/api/alerts/subscribe")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + token)
-                        .content(objectMapper.writeValueAsString(alertDTO)))
-                .andExpect(status().isCreated())
-                .andReturn();
-    }
-
-    private MvcResult performUnsubscribe(String token, AlertDTO alertDTO) throws Exception {
-        return mockMvc.perform(delete("/api/alerts/unsubscribe")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + token)
-                        .content(objectMapper.writeValueAsString(alertDTO)))
-                .andExpect(status().isNoContent())
-                .andReturn();
-    }
-
-    private void assertAlertInDatabase(AlertId alertId, int expectedUserCount) {
-        Alert savedAlert = alertRepository.findById(alertId).orElse(null);
-        assertThat(savedAlert).isNotNull();
-        assertThat(savedAlert.getUsers()).hasSize(expectedUserCount);
-    }
-
-    private void assertAlertNotInDatabase(AlertId alertId) {
-        assertThat(alertRepository.findById(alertId)).isEmpty();
-    }
-
-    private void assertRedisContainsValue(String redisKey, String redisValue, BigDecimal expectedScore) {
-        Set<String> redisElements = redisSortedSetService.getAllElements(redisKey);
-        assertThat(redisElements).contains(redisValue);
-
-        if (expectedScore != null) {
-            Double score = redisSortedSetService.getScore(redisKey, redisValue);
-            assertThat(score).isEqualTo(expectedScore.doubleValue());
-        }
-    }
-
-    private void assertRedisDoesNotContainValue(String redisKey, String redisValue) {
-        Set<String> redisElements = redisSortedSetService.getAllElements(redisKey);
-        assertThat(redisElements).doesNotContain(redisValue);
-    }
-
-    private void assertRedisKeyEmpty(String redisKey) {
-        assertThat(redisSortedSetService.getAllElements(redisKey)).isEmpty();
-    }
-
-    private void assertNoDatabaseOrRedisData() {
-        assertThat(alertRepository.findAll()).isEmpty();
-        assertThat(redisSortedSetService.getAllKeys()).isEmpty();
-    }
+    // =========================== HAPPY PATH TESTS ===========================
 
     @Nested
-    @DisplayName("Alert Subscription (/api/alerts/subscribe)")
+    @DisplayName("Alert Subscription Tests")
     class AlertSubscriptionTests {
 
         @Test
-        @DisplayName("Should subscribe to alert and add to Redis")
-        void shouldSubscribeToAlertAndAddToRedis() throws Exception {
-            // Arrange
-            AlertDTO alertDTO = createAlertDTO("BTC", 1, new BigDecimal("50000.0"));
-            AlertId alertId = createAlertId("BTC", 1, new BigDecimal("50000.0"));
-            String redisKey = createRedisKey("BTC", 1);
-            String redisValue = createRedisValue(testUser, new BigDecimal("50000.0"));
+        @DisplayName("Should successfully subscribe to alert and store in Redis")
+        void shouldSubscribeToAlertAndStoreInRedis() throws Exception {
+            // Given
+            AlertDTO alertDTO = createValidAlertDTO();
 
-            // Act
-            MvcResult result = performSubscribe(jwtToken, alertDTO);
-
-            // Assert - Response
-            assertThat(result.getResponse().getContentAsString())
-                    .contains("\"asset\":\"BTC\"")
-                    .contains("\"comparisonType\":1")
-                    .contains("\"price\":50000.0");
-
-            // Assert - Database
-            assertAlertInDatabase(alertId, 1);
-            Alert savedAlert = alertRepository.findById(alertId).get();
-            assertThat(savedAlert.getUsers().getFirst().getUsername()).isEqualTo("testuser");
-
-            // Assert - Redis
-            assertRedisContainsValue(redisKey, redisValue, new BigDecimal("50000.0"));
+            // When & Then
+            performSuccessfulSubscription(alertDTO);
+            verifyAlertStoredInRedis(alertDTO);
         }
 
         @Test
-        @DisplayName("Should subscribe multiple users to same alert without duplicating Redis entry")
-        void shouldSubscribeMultipleUsersWithoutDuplicatingRedis() throws Exception {
-            // Arrange
-            User secondUser = createAndSaveUser("seconduser", "password123");
-            String secondToken = jwtService.generateToken(secondUser.getUsername());
+        @DisplayName("Should handle duplicate subscription gracefully")
+        void shouldHandleDuplicateSubscriptionGracefully() throws Exception {
+            // Given
+            AlertDTO alertDTO = createValidAlertDTO();
 
-            AlertDTO alertDTO = createAlertDTO("ETH", 0, new BigDecimal("2000.0"));
-            AlertId alertId = createAlertId("ETH", 0, new BigDecimal("2000.0"));
-            String redisKey = createRedisKey("ETH", 0);
-            String redisValue1 = createRedisValue(testUser, new BigDecimal("2000.0"));
-            String redisValue2 = createRedisValue(secondUser, new BigDecimal("2000.0"));
+            // When - First subscription
+            performSuccessfulSubscription(alertDTO);
 
-            // Act
-            performSubscribe(jwtToken, alertDTO);
-            performSubscribe(secondToken, alertDTO);
+            // When - Second subscription (duplicate)
+            performSuccessfulSubscription(alertDTO);
 
-            // Assert - Database
-            assertAlertInDatabase(alertId, 2);
-
-            // Assert - Redis (should have two entries, one per user)
-            assertRedisContainsValue(redisKey, redisValue1, new BigDecimal("2000.0"));
-            assertRedisContainsValue(redisKey, redisValue2, new BigDecimal("2000.0"));
-
-            Set<String> redisElements = redisSortedSetService.getAllElements(redisKey);
-            assertThat(redisElements).hasSize(2);
-        }
-
-        @Test
-        @DisplayName("Should handle subscription to existing alert for same user")
-        void shouldHandleSubscriptionToExistingAlertForSameUser() throws Exception {
-            // Arrange
-            AlertDTO alertDTO = createAlertDTO("ADA", 1, new BigDecimal("1.5"));
-            AlertId alertId = createAlertId("ADA", 1, new BigDecimal("1.5"));
-            String redisKey = createRedisKey("ADA", 1);
-            String redisValue = createRedisValue(testUser, new BigDecimal("1.5"));
-
-            // Act - Subscribe twice
-            performSubscribe(jwtToken, alertDTO);
-            performSubscribe(jwtToken, alertDTO);
-
-            // Assert - Database (should still have one user)
-            assertAlertInDatabase(alertId, 1);
-
-            // Assert - Redis (should still have one entry for this user)
-            assertRedisContainsValue(redisKey, redisValue, new BigDecimal("1.5"));
-            Set<String> redisElements = redisSortedSetService.getAllElements(redisKey);
+            // Then - Verify only one element in Redis
+            verifyAlertStoredInRedis(alertDTO);
+            String expectedKey = createExpectedRedisKey(alertDTO);
+            Set<String> redisElements = redisSortedSetService.getAllElements(expectedKey);
             assertThat(redisElements).hasSize(1);
         }
 
         @Test
-        @DisplayName("Should return 403 when subscribing without authentication")
-        void shouldReturnUnauthorizedWithoutAuth() throws Exception {
-            // Arrange
-            AlertDTO alertDTO = createAlertDTO("BTC", 1, new BigDecimal("50000.0"));
+        @DisplayName("Should handle multiple alerts for same user")
+        void shouldHandleMultipleAlertsForSameUser() throws Exception {
+            // Given
+            AlertDTO alert1 = createAlertDTO("BTC", GREATER_THAN, new BigDecimal("60000"));
+            AlertDTO alert2 = createAlertDTO("BTC", LESS_THAN, new BigDecimal("40000"));
+            AlertDTO alert3 = createAlertDTO("ETH", GREATER_THAN, new BigDecimal("4000"));
 
-            // Act & Assert
-            mockMvc.perform(post("/api/alerts/subscribe")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(alertDTO)))
-                    .andExpect(status().isForbidden());
+            // When
+            performSuccessfulSubscription(alert1);
+            performSuccessfulSubscription(alert2);
+            performSuccessfulSubscription(alert3);
 
-            assertNoDatabaseOrRedisData();
+            // Then
+            verifyAlertStoredInRedis(alert1);
+            verifyAlertStoredInRedis(alert2);
+            verifyAlertStoredInRedis(alert3);
+
+            Set<String> allKeys = redisSortedSetService.getAllKeys();
+            assertThat(allKeys).hasSize(3);
         }
 
         @Test
-        @DisplayName("Should return 400 when subscribing with invalid data")
-        void shouldReturnBadRequestForInvalidData() throws Exception {
-            // Arrange
-            String invalidJson = "{\"asset\": \"\", \"comparisonType\": 999, \"price\": -1}";
+        @DisplayName("Should handle all comparison types")
+        void shouldHandleAllComparisonTypes() throws Exception {
+            // Given
+            AlertDTO greaterThanAlert = createAlertDTO("BTC", GREATER_THAN, new BigDecimal("50000"));
+            AlertDTO lessThanAlert = createAlertDTO("BTC", LESS_THAN, new BigDecimal("40000"));
+            AlertDTO equalAlert = createAlertDTO("BTC", EQUAL, new BigDecimal("45000"));
 
-            // Act & Assert
-            mockMvc.perform(post("/api/alerts/subscribe")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", "Bearer " + jwtToken)
-                            .content(invalidJson))
-                    .andExpect(status().isBadRequest());
+            // When
+            performSuccessfulSubscription(greaterThanAlert);
+            performSuccessfulSubscription(lessThanAlert);
+            performSuccessfulSubscription(equalAlert);
 
-            assertNoDatabaseOrRedisData();
+            // Then
+            verifyAlertStoredInRedis(greaterThanAlert);
+            verifyAlertStoredInRedis(lessThanAlert);
+            verifyAlertStoredInRedis(equalAlert);
+
+            Set<String> allKeys = redisSortedSetService.getAllKeys();
+            assertThat(allKeys).hasSize(3);
         }
     }
 
     @Nested
-    @DisplayName("Alert Unsubscription (/api/alerts/unsubscribe)")
+    @DisplayName("Alert Unsubscription Tests")
     class AlertUnsubscriptionTests {
 
         @Test
-        @DisplayName("Should unsubscribe from alert and remove from Redis when last user")
-        void shouldUnsubscribeAndRemoveFromRedisWhenLastUser() throws Exception {
-            // Arrange
-            AlertDTO alertDTO = createAlertDTO("BTC", 1, new BigDecimal("50000.0"));
-            AlertId alertId = createAlertId("BTC", 1, new BigDecimal("50000.0"));
-            String redisKey = createRedisKey("BTC", 1);
-            String redisValue = createRedisValue(testUser, new BigDecimal("50000.0"));
+        @DisplayName("Should successfully unsubscribe from alert and remove from Redis")
+        void shouldUnsubscribeFromAlertAndRemoveFromRedis() throws Exception {
+            // Given
+            AlertDTO alertDTO = createValidAlertDTO();
+            performSuccessfulSubscription(alertDTO);
+            verifyAlertStoredInRedis(alertDTO);
 
-            // Subscribe first
-            performSubscribe(jwtToken, alertDTO);
-            assertRedisContainsValue(redisKey, redisValue, new BigDecimal("50000.0"));
+            // When
+            performSuccessfulUnsubscription(alertDTO);
 
-            // Act - Unsubscribe
-            performUnsubscribe(jwtToken, alertDTO);
-
-            // Assert - Database
-            assertAlertNotInDatabase(alertId);
-
-            // Assert - Redis
-            assertRedisDoesNotContainValue(redisKey, redisValue);
+            // Then
+            verifyAlertRemovedFromRedis(alertDTO);
         }
 
         @Test
-        @DisplayName("Should unsubscribe without affecting other users' Redis entries")
-        void shouldUnsubscribeWithoutAffectingOtherUsersRedisEntries() throws Exception {
-            // Arrange
-            User secondUser = createAndSaveUser("seconduser", "password123");
-            String secondToken = jwtService.generateToken(secondUser.getUsername());
+        @DisplayName("Should return 404 when unsubscribing from non-existent alert")
+        void shouldReturn404ForNonExistentAlert() throws Exception {
+            // Given
+            AlertDTO alertDTO = createValidAlertDTO();
 
-            AlertDTO alertDTO = createAlertDTO("ETH", 0, new BigDecimal("2000.0"));
-            AlertId alertId = createAlertId("ETH", 0, new BigDecimal("2000.0"));
-            String redisKey = createRedisKey("ETH", 0);
-            String redisValue1 = createRedisValue(testUser, new BigDecimal("2000.0"));
-            String redisValue2 = createRedisValue(secondUser, new BigDecimal("2000.0"));
-
-            // Subscribe both users
-            performSubscribe(jwtToken, alertDTO);
-            performSubscribe(secondToken, alertDTO);
-
-            // Act - First user unsubscribes
-            performUnsubscribe(jwtToken, alertDTO);
-
-            // Assert - Database (alert should still exist with second user)
-            assertAlertInDatabase(alertId, 1);
-            Alert remainingAlert = alertRepository.findById(alertId).get();
-            assertThat(remainingAlert.getUsers().iterator().next().getUsername()).isEqualTo("seconduser");
-
-            // Assert - Redis (first user's entry should be removed, second user's should remain)
-            assertRedisDoesNotContainValue(redisKey, redisValue1);
-            assertRedisContainsValue(redisKey, redisValue2, new BigDecimal("2000.0"));
-        }
-
-        @Test
-        @DisplayName("Should return 403 when unsubscribing without authentication")
-        void shouldReturnUnauthorizedWithoutAuth() throws Exception {
-            // Arrange
-            AlertDTO alertDTO = createAlertDTO("BTC", 1, new BigDecimal("50000.0"));
-
-            // Act & Assert
-            mockMvc.perform(delete("/api/alerts/unsubscribe")
+            // When & Then
+            mockMvc.perform(delete(UNSUBSCRIBE_ENDPOINT)
+                            .header("Authorization", "Bearer " + jwtToken)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(alertDTO)))
-                    .andExpect(status().isForbidden());
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.status").value(404))
+                    .andExpect(jsonPath("$.timestamp").exists());
+        }
+    }
+
+    // =========================== ERROR HANDLING TESTS ===========================
+
+    @Nested
+    @DisplayName("Authentication Error Tests")
+    class AuthenticationErrorTests {
+
+        @Test
+        @DisplayName("Should return 401 for subscription without token")
+        void shouldReturn401ForSubscriptionWithoutToken() throws Exception {
+            AlertDTO alertDTO = createValidAlertDTO();
+
+            mockMvc.perform(post(SUBSCRIBE_ENDPOINT)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(alertDTO)))
+                    .andExpect(status().isUnauthorized());
         }
 
         @Test
-        @DisplayName("Should return 400 when unsubscribing with invalid data")
-        void shouldReturnBadRequestForInvalidData() throws Exception {
-            // Arrange
-            String invalidJson = "{\"asset\": \"\", \"comparisonType\": 999, \"price\": -1}";
+        @DisplayName("Should return 401 for unsubscription without token")
+        void shouldReturn401ForUnsubscriptionWithoutToken() throws Exception {
+            AlertDTO alertDTO = createValidAlertDTO();
 
-            // Act & Assert
-            mockMvc.perform(delete("/api/alerts/unsubscribe")
+            mockMvc.perform(delete(UNSUBSCRIBE_ENDPOINT)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", "Bearer " + jwtToken)
-                            .content(invalidJson))
+                            .content(objectMapper.writeValueAsString(alertDTO)))
+                    .andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        @DisplayName("Should return 400 for invalid token")
+        void shouldReturn401ForInvalidToken() throws Exception {
+            AlertDTO alertDTO = createValidAlertDTO();
+
+            mockMvc.perform(post(SUBSCRIBE_ENDPOINT)
+                            .header("Authorization", "Bearer invalid_token")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(alertDTO)))
                     .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("Should return 401 for bad credentials during login")
+        void shouldReturn401ForBadCredentials() throws Exception {
+            UserDTO invalidUserDTO = createUserDTO("wronguser", "wrongpassword");
+
+            mockMvc.perform(post(LOGIN_ENDPOINT)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(invalidUserDTO)))
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.error").value("Invalid username or password"));
         }
     }
 
     @Nested
-    @DisplayName("Complete Alert Lifecycle with Redis")
-    class CompleteAlertLifecycleTests {
+    @DisplayName("Validation Error Tests")
+    class ValidationErrorTests {
 
         @Test
-        @DisplayName("Should complete full alert lifecycle: subscribe → verify Redis → unsubscribe → verify Redis cleanup")
-        void shouldCompleteFullAlertLifecycle() throws Exception {
-            // Arrange
-            AlertDTO alertDTO = createAlertDTO("DOGE", 1, new BigDecimal("0.1"));
-            AlertId alertId = createAlertId("DOGE", 1, new BigDecimal("0.1"));
-            String redisKey = createRedisKey("DOGE", 1);
-            String redisValue = createRedisValue(testUser, new BigDecimal("0.1"));
+        @DisplayName("Should return 400 for invalid alert DTO - missing asset")
+        void shouldReturn400ForMissingAsset() throws Exception {
+            AlertDTO invalidAlertDTO = createAlertDTO(null, GREATER_THAN, TEST_PRICE);
 
-            // Act - Subscribe
-            performSubscribe(jwtToken, alertDTO);
-
-            // Assert - Verify Redis entry created
-            assertRedisContainsValue(redisKey, redisValue, new BigDecimal("0.1"));
-
-            // Act - Unsubscribe
-            performUnsubscribe(jwtToken, alertDTO);
-
-            // Assert - Verify Redis and database cleanup
-            assertRedisDoesNotContainValue(redisKey, redisValue);
-            assertAlertNotInDatabase(alertId);
+            mockMvc.perform(post(SUBSCRIBE_ENDPOINT)
+                            .header("Authorization", "Bearer " + jwtToken)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(invalidAlertDTO)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.asset").exists()); // Field validation error
         }
 
         @Test
-        @DisplayName("Should handle multiple alerts with different assets and comparison types")
-        void shouldHandleMultipleAlertsWithDifferentKeysInRedis() throws Exception {
-            // Arrange
-            AlertDTO alert1 = createAlertDTO("BTC", 1, new BigDecimal("50000.0"));
-            AlertDTO alert2 = createAlertDTO("BTC", 0, new BigDecimal("45000.0"));
-            AlertDTO alert3 = createAlertDTO("ETH", 1, new BigDecimal("3000.0"));
+        @DisplayName("Should return 400 for invalid alert DTO - blank asset")
+        void shouldReturn400ForBlankAsset() throws Exception {
+            AlertDTO invalidAlertDTO = createAlertDTO("", GREATER_THAN, TEST_PRICE);
 
-            String redisKey1 = createRedisKey("BTC", 1);
-            String redisKey2 = createRedisKey("BTC", 0);
-            String redisKey3 = createRedisKey("ETH", 1);
-
-            String redisValue1 = createRedisValue(testUser, new BigDecimal("50000.0"));
-            String redisValue2 = createRedisValue(testUser, new BigDecimal("45000.0"));
-            String redisValue3 = createRedisValue(testUser, new BigDecimal("3000.0"));
-
-            // Act - Subscribe to all alerts
-            performSubscribe(jwtToken, alert1);
-            performSubscribe(jwtToken, alert2);
-            performSubscribe(jwtToken, alert3);
-
-            // Assert - Verify all Redis entries
-            assertRedisContainsValue(redisKey1, redisValue1, new BigDecimal("50000.0"));
-            assertRedisContainsValue(redisKey2, redisValue2, new BigDecimal("45000.0"));
-            assertRedisContainsValue(redisKey3, redisValue3, new BigDecimal("3000.0"));
-
-            // Act - Unsubscribe from one alert
-            performUnsubscribe(jwtToken, alert1);
-
-            // Assert - Verify selective Redis cleanup
-            assertRedisDoesNotContainValue(redisKey1, redisValue1);
-            assertRedisContainsValue(redisKey2, redisValue2, new BigDecimal("45000.0"));
-            assertRedisContainsValue(redisKey3, redisValue3, new BigDecimal("3000.0"));
+            mockMvc.perform(post(SUBSCRIBE_ENDPOINT)
+                            .header("Authorization", "Bearer " + jwtToken)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(invalidAlertDTO)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.asset").exists()); // Field validation error
         }
 
         @Test
-        @DisplayName("Should handle concurrent subscriptions and unsubscriptions with Redis consistency")
-        void shouldHandleConcurrentOperationsWithRedisConsistency() throws Exception {
-            // Arrange
-            AlertDTO alertDTO = createAlertDTO("LTC", 1, new BigDecimal("150.0"));
-            AlertId alertId = createAlertId("LTC", 1, new BigDecimal("150.0"));
-            String redisKey = createRedisKey("LTC", 1);
+        @DisplayName("Should return 400 for invalid alert DTO - missing price")
+        void shouldReturn400ForMissingPrice() throws Exception {
+            AlertDTO invalidAlertDTO = createAlertDTO(TEST_ASSET, GREATER_THAN, null);
 
-            // Create multiple users
-            User user2 = createAndSaveUser("user2", "password123");
-            User user3 = createAndSaveUser("user3", "password123");
-            String token2 = jwtService.generateToken(user2.getUsername());
-            String token3 = jwtService.generateToken(user3.getUsername());
-
-            String redisValue1 = createRedisValue(testUser, new BigDecimal("150.0"));
-            String redisValue2 = createRedisValue(user2, new BigDecimal("150.0"));
-            String redisValue3 = createRedisValue(user3, new BigDecimal("150.0"));
-
-            // Act - Multiple users subscribe
-            performSubscribe(jwtToken, alertDTO);
-            performSubscribe(token2, alertDTO);
-            performSubscribe(token3, alertDTO);
-
-            // Assert - Redis should have three entries (one per user)
-            assertRedisContainsValue(redisKey, redisValue1, new BigDecimal("150.0"));
-            assertRedisContainsValue(redisKey, redisValue2, new BigDecimal("150.0"));
-            assertRedisContainsValue(redisKey, redisValue3, new BigDecimal("150.0"));
-
-            Set<String> redisElements = redisSortedSetService.getAllElements(redisKey);
-            assertThat(redisElements).hasSize(3);
-
-            // Act - Two users unsubscribe
-            performUnsubscribe(jwtToken, alertDTO);
-            performUnsubscribe(token2, alertDTO);
-
-            // Assert - Redis should have only one entry (one user remains)
-            assertRedisDoesNotContainValue(redisKey, redisValue1);
-            assertRedisDoesNotContainValue(redisKey, redisValue2);
-            assertRedisContainsValue(redisKey, redisValue3, new BigDecimal("150.0"));
-
-            // Act - Last user unsubscribes
-            performUnsubscribe(token3, alertDTO);
-
-            // Assert - Redis should be clean
-            assertRedisDoesNotContainValue(redisKey, redisValue3);
-            assertAlertNotInDatabase(alertId);
+            mockMvc.perform(post(SUBSCRIBE_ENDPOINT)
+                            .header("Authorization", "Bearer " + jwtToken)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(invalidAlertDTO)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.price").exists()); // Field validation error
         }
+
+        @Test
+        @DisplayName("Should return 400 for invalid alert DTO - negative price")
+        void shouldReturn400ForNegativePrice() throws Exception {
+            AlertDTO invalidAlertDTO = createAlertDTO(TEST_ASSET, GREATER_THAN, new BigDecimal("-100"));
+
+            mockMvc.perform(post(SUBSCRIBE_ENDPOINT)
+                            .header("Authorization", "Bearer " + jwtToken)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(invalidAlertDTO)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.price").exists()); // Field validation error
+        }
+
+        @Test
+        @DisplayName("Should return 400 for invalid alert DTO - zero price")
+        void shouldReturn400ForZeroPrice() throws Exception {
+            AlertDTO invalidAlertDTO = createAlertDTO(TEST_ASSET, GREATER_THAN, BigDecimal.ZERO);
+
+            mockMvc.perform(post(SUBSCRIBE_ENDPOINT)
+                            .header("Authorization", "Bearer " + jwtToken)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(invalidAlertDTO)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.price").exists()); // Field validation error
+        }
+
+        @Test
+        @DisplayName("Should return 400 for invalid comparisonType - too high")
+        void shouldReturn400ForInvalidComparisonTypeTooHigh() throws Exception {
+            AlertDTO invalidAlertDTO = createAlertDTO(TEST_ASSET, 2, TEST_PRICE);
+
+            mockMvc.perform(post(SUBSCRIBE_ENDPOINT)
+                            .header("Authorization", "Bearer " + jwtToken)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(invalidAlertDTO)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.comparisonType").exists()); // Field validation error
+        }
+
+        @Test
+        @DisplayName("Should return 400 for invalid comparisonType - too low")
+        void shouldReturn400ForInvalidComparisonTypeTooLow() throws Exception {
+            AlertDTO invalidAlertDTO = createAlertDTO(TEST_ASSET, -2, TEST_PRICE);
+
+            mockMvc.perform(post(SUBSCRIBE_ENDPOINT)
+                            .header("Authorization", "Bearer " + jwtToken)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(invalidAlertDTO)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.comparisonType").exists()); // Field validation error
+        }
+
+        @Test
+        @DisplayName("Should return 400 for malformed JSON")
+        void shouldReturn400ForMalformedJson() throws Exception {
+            String malformedJson = "{\"asset\": \"BTC\", \"price\": invalid_number}";
+
+            mockMvc.perform(post(SUBSCRIBE_ENDPOINT)
+                            .header("Authorization", "Bearer " + jwtToken)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(malformedJson))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.error").value("Malformed JSON request"))
+                    .andExpect(jsonPath("$.details").exists())
+                    .andExpect(jsonPath("$.status").value(400))
+                    .andExpect(jsonPath("$.timestamp").exists());
+        }
+
+        @Test
+        @DisplayName("Should return 400 for invalid user DTO - missing username")
+        void shouldReturn400ForMissingUsername() throws Exception {
+            UserDTO invalidUserDTO = createUserDTO(null, TEST_PASSWORD);
+
+            mockMvc.perform(post(USERS_ENDPOINT)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(invalidUserDTO)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.username").exists()); // Field validation error
+        }
+    }
+
+    @Nested
+    @DisplayName("Conflict Error Tests")
+    class ConflictErrorTests {
+
+        @Test
+        @DisplayName("Should return 409 for duplicate user creation")
+        void shouldReturn409ForDuplicateUser() throws Exception {
+            UserDTO userDTO = createUserDTO("duplicateuser", TEST_PASSWORD);
+
+            // First creation should succeed
+            mockMvc.perform(post(USERS_ENDPOINT)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(userDTO)))
+                    .andExpect(status().isCreated());
+
+            // Second creation should fail with conflict
+            mockMvc.perform(post(USERS_ENDPOINT)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(userDTO)))
+                    .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.error").value("User duplicateuser already exists"))
+                    .andExpect(jsonPath("$.status").value(409))
+                    .andExpect(jsonPath("$.timestamp").exists());
+        }
+    }
+
+    // =========================== REDIS VERIFICATION TESTS ===========================
+
+    @Nested
+    @DisplayName("Redis Integration Tests")
+    class RedisIntegrationTests {
+
+        @Test
+        @DisplayName("Should verify Redis data structure integrity")
+        void shouldVerifyRedisDataStructureIntegrity() throws Exception {
+            // Given
+            AlertDTO alertDTO = createAlertDTO("SOL", GREATER_THAN, new BigDecimal("100.50"));
+
+            // When
+            performSuccessfulSubscription(alertDTO);
+
+            // Then
+            String expectedKey = "SOL:1"; // GREATER_THAN = 1
+            String expectedValue = TEST_USERNAME + ":100.50";
+
+            Set<String> elements = redisSortedSetService.getAllElements(expectedKey);
+            assertThat(elements).contains(expectedValue);
+
+            Double score = redisSortedSetService.getScore(expectedKey, expectedValue);
+            assertThat(score).isEqualTo(100.50);
+
+            // Verify range queries work
+            Set<String> rangeResults = redisSortedSetService.getRangeByScore(
+                    expectedKey,
+                    new BigDecimal("100"),
+                    new BigDecimal("101"),
+                    true,
+                    true);
+            assertThat(rangeResults).contains(expectedValue);
+        }
+
+        @Test
+        @DisplayName("Should handle Redis cleanup properly")
+        void shouldHandleRedisCleanupProperly() throws Exception {
+            // Given
+            AlertDTO alertDTO = createValidAlertDTO();
+            performSuccessfulSubscription(alertDTO);
+            verifyAlertStoredInRedis(alertDTO);
+
+            // When
+            performSuccessfulUnsubscription(alertDTO);
+
+            // Then
+            verifyAlertRemovedFromRedis(alertDTO);
+        }
+
+        @Test
+        @DisplayName("Should handle different comparison types in Redis keys")
+        void shouldHandleDifferentComparisonTypesInRedisKeys() throws Exception {
+            // Given
+            AlertDTO greaterThanAlert = createAlertDTO("BTC", GREATER_THAN, new BigDecimal("50000"));
+            AlertDTO lessThanAlert = createAlertDTO("BTC", LESS_THAN, new BigDecimal("40000"));
+            AlertDTO equalAlert = createAlertDTO("BTC", EQUAL, new BigDecimal("45000"));
+
+            // When
+            performSuccessfulSubscription(greaterThanAlert);
+            performSuccessfulSubscription(lessThanAlert);
+            performSuccessfulSubscription(equalAlert);
+
+            // Then
+            verifyAlertStoredInRedis(greaterThanAlert);
+            verifyAlertStoredInRedis(lessThanAlert);
+            verifyAlertStoredInRedis(equalAlert);
+
+            // Verify different keys are created
+            Set<String> allKeys = redisSortedSetService.getAllKeys();
+            assertThat(allKeys).containsExactlyInAnyOrder("BTC:1", "BTC:-1", "BTC:0");
+        }
+    }
+
+    // =========================== HELPER METHODS ===========================
+
+    private void createTestUser() throws Exception {
+        UserDTO userDTO = createUserDTO(TEST_USERNAME, TEST_PASSWORD);
+
+        mockMvc.perform(post(USERS_ENDPOINT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(userDTO)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.message").value("User created"))
+                .andExpect(jsonPath("$.username").value(TEST_USERNAME));
+    }
+
+    private String authenticateAndGetToken() throws Exception {
+        UserDTO loginDTO = createUserDTO(TEST_USERNAME, TEST_PASSWORD);
+
+        MvcResult result = mockMvc.perform(post(LOGIN_ENDPOINT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginDTO)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").exists())
+                .andReturn();
+
+        String response = result.getResponse().getContentAsString();
+        @SuppressWarnings("unchecked")
+        Map<String, String> tokenResponse = objectMapper.readValue(response, Map.class);
+        return tokenResponse.get("token");
+    }
+
+    private void performSuccessfulSubscription(AlertDTO alertDTO) throws Exception {
+        mockMvc.perform(post(SUBSCRIBE_ENDPOINT)
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(alertDTO)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.message").value("Alert created"))
+                .andExpect(jsonPath("$.username").value(TEST_USERNAME))
+                .andExpect(jsonPath("$.alert.asset").value(alertDTO.getAsset()))
+                .andExpect(jsonPath("$.alert.comparisonType").value(alertDTO.getComparisonType()))
+                .andExpect(jsonPath("$.alert.price").value(alertDTO.getPrice().doubleValue()));
+    }
+
+    private void performSuccessfulUnsubscription(AlertDTO alertDTO) throws Exception {
+        mockMvc.perform(delete(UNSUBSCRIBE_ENDPOINT)
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(alertDTO)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("You have unsubscribed from alert succesfully"))
+                .andExpect(jsonPath("$.username").value(TEST_USERNAME))
+                .andExpect(jsonPath("$.alert.asset").value(alertDTO.getAsset()));
+    }
+
+    private void verifyAlertStoredInRedis(AlertDTO alertDTO) {
+        String expectedKey = createExpectedRedisKey(alertDTO);
+        String expectedValue = createExpectedRedisValue(alertDTO);
+
+        Set<String> redisElements = redisSortedSetService.getAllElements(expectedKey);
+        assertThat(redisElements).isNotEmpty();
+        assertThat(redisElements).contains(expectedValue);
+
+        Double score = redisSortedSetService.getScore(expectedKey, expectedValue);
+        assertThat(score).isEqualTo(alertDTO.getPrice().doubleValue());
+    }
+
+    private void verifyAlertRemovedFromRedis(AlertDTO alertDTO) {
+        String expectedKey = createExpectedRedisKey(alertDTO);
+        Set<String> redisElements = redisSortedSetService.getAllElements(expectedKey);
+        assertThat(redisElements).isEmpty();
+    }
+
+    private String createExpectedRedisKey(AlertDTO alertDTO) {
+        return redisSortedSetService.createRuleIndexKey(
+                alertDTO.getAsset(),
+                String.valueOf(alertDTO.getComparisonType()));
+    }
+
+    private String createExpectedRedisValue(AlertDTO alertDTO) {
+        return redisSortedSetService.createRuleIndexValue(
+                createTestUser2(),
+                alertDTO.getPrice());
+    }
+
+    private AlertDTO createValidAlertDTO() {
+        return createAlertDTO(TEST_ASSET, GREATER_THAN, TEST_PRICE);
+    }
+
+    private AlertDTO createAlertDTO(String asset, int comparisonType, BigDecimal price) {
+        AlertDTO alertDTO = new AlertDTO();
+        alertDTO.setAsset(asset);
+        alertDTO.setComparisonType(comparisonType);
+        alertDTO.setPrice(price);
+        return alertDTO;
+    }
+
+    private UserDTO createUserDTO(String username, String password) {
+        UserDTO userDTO = new UserDTO();
+        userDTO.setUsername(username);
+        userDTO.setPassword(password);
+        return userDTO;
+    }
+
+    private User createTestUser2() {
+        User user = new User();
+        user.setUsername(TEST_USERNAME);
+        user.setPassword(TEST_PASSWORD);
+        return user;
     }
 }

@@ -14,10 +14,10 @@ public class RedisSortedSetService {
 
     private static final Logger logger = LoggerFactory.getLogger(RedisSortedSetService.class);
 
-    private final RedisTemplate<String, String> redisTemplate;
+    private final RedisTemplate<String, String> redisTemplateString;
 
-    public RedisSortedSetService(RedisTemplate<String, String> redisTemplate) {
-        this.redisTemplate = redisTemplate;
+    public RedisSortedSetService(RedisTemplate<String, String> redisTemplateString) {
+        this.redisTemplateString = redisTemplateString;
     }
 
     public String createRuleIndexKey(String asset, String type) {
@@ -29,7 +29,7 @@ public class RedisSortedSetService {
     }
 
     public void addElement(String key, String value, BigDecimal score) {
-        Boolean result = redisTemplate.opsForZSet().add(key, value, score.doubleValue());
+        Boolean result = redisTemplateString.opsForZSet().add(key, value, score.doubleValue());
         if (Boolean.FALSE.equals(result)) {
             logger.warn("Failed to add element to Redis ZSet: key={}, value={}, score={}", key, value, score);
         } else {
@@ -38,7 +38,7 @@ public class RedisSortedSetService {
     }
 
     public void removeElement(String key, String value) {
-        Long removed = redisTemplate.opsForZSet().remove(key, value);
+        Long removed = redisTemplateString.opsForZSet().remove(key, value);
         if (removed != null && removed == 0) {
             logger.warn("Element not found for removal: key={}, value={}", key, value);
         } else {
@@ -50,25 +50,25 @@ public class RedisSortedSetService {
         double adjustedMin = minInclusive ? minScore.doubleValue() : Math.nextUp(minScore.doubleValue());
         double adjustedMax = maxInclusive ? maxScore.doubleValue() : Math.nextDown(maxScore.doubleValue());
 
-        return redisTemplate.opsForZSet().rangeByScore(key, adjustedMin, adjustedMax);
+        return redisTemplateString.opsForZSet().rangeByScore(key, adjustedMin, adjustedMax);
     }
 
     public Set<String> getAllElements(String key) {
-        return redisTemplate.opsForZSet().range(key, 0, -1);
+        return redisTemplateString.opsForZSet().range(key, 0, -1);
     }
 
     public Double getScore(String key, String value) {
-        return redisTemplate.opsForZSet().score(key, value);
+        return redisTemplateString.opsForZSet().score(key, value);
     }
 
     public Set<String> getAllKeys() {
-        return redisTemplate.keys("*");
+        return redisTemplateString.keys("*");
     }
 
     public void deleteAll() {
-        Set<String> keys = redisTemplate.keys("*");
+        Set<String> keys = redisTemplateString.keys("*");
         if (keys != null && !keys.isEmpty()) {
-            redisTemplate.delete(keys);
+            redisTemplateString.delete(keys);
             logger.info("Deleted all Redis keys: {}", keys);
         } else {
             logger.info("No Redis keys to delete");

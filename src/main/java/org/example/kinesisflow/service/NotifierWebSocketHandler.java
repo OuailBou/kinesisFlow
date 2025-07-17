@@ -57,7 +57,7 @@ public class NotifierWebSocketHandler extends TextWebSocketHandler {
             }
         }
         else {
-            System.out.println("❌ Usuario " + userId + " no conectado o sesión cerrada.");
+            System.out.println("❌ User " + userId + " not connected or session closed.");
         }
     }
 }

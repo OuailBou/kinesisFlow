@@ -105,6 +105,19 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleAllExceptions(Exception ex) {
+        Throwable root = ex;
+        while (root.getCause() != null) {
+            root = root.getCause();
+        }
+
+        if (root instanceof AlertNotFoundException) {
+            return handleAlertNotFound((AlertNotFoundException) root);
+        } else if (root instanceof UserNotFoundException) {
+            return handleUserNotFound((UserNotFoundException) root);
+        } else if (root instanceof ConcurrentConflictException) {
+            return handleConcurrentConflict((ConcurrentConflictException) root);
+        }
+
         logger.error("Unhandled exception occurred", ex);
 
         Map<String, Object> error = new HashMap<>();
@@ -114,4 +127,5 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
+
 }

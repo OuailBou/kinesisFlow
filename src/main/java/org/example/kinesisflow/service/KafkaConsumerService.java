@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -36,14 +37,13 @@ public class KafkaConsumerService {
             groupId = "kinesis-group",
             concurrency = "3"
     )
+    @Transactional
     public void listen(cryptoEvent cryptoEvent) {
         log.info("Message received: {}", cryptoEvent);
 
-        try {
+
             processCryptoEvent(cryptoEvent);
-        } catch (Exception e) {
-            log.error("Error processing crypto event: {}", cryptoEvent, e);
-        }
+
     }
 
     private void processCryptoEvent(cryptoEvent cryptoEvent) {
