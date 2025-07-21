@@ -1,6 +1,6 @@
 package org.example.kinesisflow.config;
 
-import org.example.kinesisflow.service.RedisMessageSubscriber;
+import org.example.kinesisflow.websocket.RedisMessageSubscriber;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;

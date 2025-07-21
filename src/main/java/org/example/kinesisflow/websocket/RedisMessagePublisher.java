@@ -1,4 +1,4 @@
-package org.example.kinesisflow.service;
+package org.example.kinesisflow.websocket;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

@@ -2,6 +2,7 @@ package org.example.kinesisflow.service;
 
 import org.example.kinesisflow.mapper.EventToNotificationMapper;
 import org.example.kinesisflow.record.cryptoEvent;
+import org.example.kinesisflow.websocket.RedisMessagePublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -35,7 +36,8 @@ public class KafkaConsumerService {
             id = "kinesis-listener",
             topics = "raw-market-data",
             groupId = "kinesis-group",
-            concurrency = "3"
+            concurrency = "3",
+            containerFactory = "kafkaListenerContainerFactory"
     )
     @Transactional
     public void listen(cryptoEvent cryptoEvent) {

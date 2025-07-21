@@ -15,7 +15,7 @@ public class KafkaDLQConfig {
     @Bean
     public DefaultErrorHandler errorHandler(KafkaTemplate<Object, Object> kafkaTemplate) {
         DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(kafkaTemplate,
-                (record, ex) -> new TopicPartition(record.topic() + "-DLQ", record.partition()));
+                (record, ex) -> new TopicPartition(STR."\{record.topic()}-DLQ", record.partition()));
 
         FixedBackOff backOff = new FixedBackOff(100L, 2);
 

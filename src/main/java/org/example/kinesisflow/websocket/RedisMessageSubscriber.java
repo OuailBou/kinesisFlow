@@ -1,9 +1,8 @@
-package org.example.kinesisflow.service;
+package org.example.kinesisflow.websocket;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.kinesisflow.record.Notification;
-import org.example.kinesisflow.websocket.AuthHandshakeInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.connection.Message;
@@ -15,7 +14,7 @@ import org.springframework.stereotype.Service;
 public class RedisMessageSubscriber implements MessageListener {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final NotifierWebSocketHandler  notifierWebSocketHandler;
+    private final NotifierWebSocketHandler notifierWebSocketHandler;
     private static final Logger log = LoggerFactory.getLogger(RedisMessageSubscriber.class);
 
     public RedisMessageSubscriber(NotifierWebSocketHandler notifierWebSocketHandler) {

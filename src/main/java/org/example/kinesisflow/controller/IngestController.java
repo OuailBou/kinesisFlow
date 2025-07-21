@@ -1,4 +1,5 @@
 package org.example.kinesisflow.controller;
+import jakarta.validation.Valid;
 import org.example.kinesisflow.record.cryptoEvent;
 import org.example.kinesisflow.service.KafkaProducerService;
 import org.springframework.http.ResponseEntity;

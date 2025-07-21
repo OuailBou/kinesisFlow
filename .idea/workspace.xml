@@ -4,17 +4,24 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d483ce6d-440c-4168-a45c-3ac57b477076" name="Changes" comment="implementing more robust controller responses, error handling. and rewriting some tests">
+    <list default="true" id="d483ce6d-440c-4168-a45c-3ac57b477076" name="Changes" comment="finished testing dlq">
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/DlqListener.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/websocket/CustomWebSocketClient.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/org/example/kinesisflow/AlertNotificationIntegrationTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/exception/GlobalExceptionHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/exception/GlobalExceptionHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/listener/AlertDomainEventListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/listener/AlertDomainEventListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/config/AppConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/config/AppConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/config/KafkaDLQConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/config/KafkaDLQConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/config/RedisConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/config/RedisConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/config/WebSocketConfiguration.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/config/WebSocketConfiguration.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/controller/IngestController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/controller/IngestController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/KafkaConsumerService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/KafkaConsumerService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/KafkaProducerService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/KafkaProducerService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/NotifierWebSocketHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/NotifierWebSocketHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/RedisMessagePublisher.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/RedisMessagePublisher.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/RedisMessageSubscriber.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/RedisMessageSubscriber.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/RedisSortedSetService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/RedisSortedSetService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/org/example/kinesisflow/AlertControllerIntegrationTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/org/example/kinesisflow/AlertControllerIntegrationTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/NotifierWebSocketHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/websocket/NotifierWebSocketHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/RedisMessagePublisher.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/websocket/RedisMessagePublisher.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/RedisMessageSubscriber.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/websocket/RedisMessageSubscriber.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/org/example/kinesisflow/KafkaProducerConsumerIntegrationTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/org/example/kinesisflow/KinesisFlowApplicationTests.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/org/example/kinesisflow/KinesisFlowApplicationTests.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -71,76 +78,95 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Application.KinesisFlowApplication.executor": "Run",
-    "Docker.infrastructure.kafka-ui: Compose Deployment.executor": "Run",
-    "Docker.infrastructure.kafka: Compose Deployment.executor": "Run",
-    "Docker.infrastructure.postgres: Compose Deployment.executor": "Run",
-    "Docker.infrastructure.zookeeper: Compose Deployment.executor": "Run",
-    "Docker.infrastructure: Compose Deployment.executor": "Run",
-    "JUnit.AlertControllerIntegrationTest$AlertSubscriptionTests.executor": "Run",
-    "JUnit.AlertControllerIntegrationTest$AlertSubscriptionTests.shouldSubscribeToAlertAndAddToRedis.executor": "Run",
-    "JUnit.AlertControllerIntegrationTest$AlertSubscriptionTests.shouldSubscribeToAlertAndStoreInRedis.executor": "Run",
-    "JUnit.AlertControllerIntegrationTest$AlertUnsubscriptionTests.shouldHandleUnsubscriptionFromNonExistentAlert.executor": "Run",
-    "JUnit.AlertControllerIntegrationTest$AlertUnsubscriptionTests.shouldReturn404ForNonExistentAlert.executor": "Run",
-    "JUnit.AlertControllerIntegrationTest$AuthenticationErrorTests.shouldReturn401ForInvalidToken.executor": "Run",
-    "JUnit.AlertControllerIntegrationTest$ConflictErrorTests.shouldReturn409ForDuplicateUser.executor": "Run",
-    "JUnit.AlertControllerIntegrationTest$EdgeCasesAndErrorHandlingTests.shouldHandleConcurrentSubscriptionRequests.executor": "Run",
-    "JUnit.AlertControllerIntegrationTest$EdgeCasesAndErrorHandlingTests.shouldHandleMissingAuthorizationHeader.executor": "Run",
-    "JUnit.AlertControllerIntegrationTest$SubscribeToAlertTests.shouldAddUserToExistingAlertSubscription.executor": "Run",
-    "JUnit.AlertControllerIntegrationTest$SubscribeToAlertTests.shouldCreateNewAlertSubscriptionSuccessfully.executor": "Run",
-    "JUnit.AlertControllerIntegrationTest$SubscribeToAlertTests.shouldReturn400WhenAlertDTOIsInvalid.executor": "Run",
-    "JUnit.AlertControllerIntegrationTest$SubscribeToAlertTests.shouldReturn400WhenRequestBodyIsMalformedJson.executor": "Run",
-    "JUnit.AlertControllerIntegrationTest$SubscribeToAlertTests.shouldReturn401WhenUserIsNotAuthenticated.executor": "Run",
-    "JUnit.AlertControllerIntegrationTest$SubscribeToAlertTests.shouldReturn403WhenJwtTokenIsInvalid.executor": "Run",
-    "JUnit.AlertControllerIntegrationTest$SubscribeToAlertTests.shouldReturn403WhenUserIsNotAuthenticated.executor": "Run",
-    "JUnit.AlertControllerIntegrationTest$SubscribeToAlertTests.shouldReturn415WhenContentTypeIsNotJson.executor": "Run",
-    "JUnit.AlertControllerIntegrationTest$SubscribeToAlertTests.shouldReturn500WhenUserDoesNotExist.executor": "Run",
-    "JUnit.AlertControllerIntegrationTest$UnsubscribeFromAlertTests.shouldHandleUnsubscribeWhenUserIsNotSubscribedToAlert.executor": "Run",
-    "JUnit.AlertControllerIntegrationTest$UnsubscribeFromAlertTests.shouldRemoveUserFromAlertWithMultipleSubscribers.executor": "Run",
-    "JUnit.AlertControllerIntegrationTest$UnsubscribeFromAlertTests.shouldReturn400WhenAlertDTOIsInvalid.executor": "Run",
-    "JUnit.AlertControllerIntegrationTest$UnsubscribeFromAlertTests.shouldReturn403WhenJwtTokenIsInvalid.executor": "Run",
-    "JUnit.AlertControllerIntegrationTest$UnsubscribeFromAlertTests.shouldReturn403WhenUserIsNotAuthenticated.executor": "Run",
-    "JUnit.AlertControllerIntegrationTest$UnsubscribeFromAlertTests.shouldUnsubscribeFromAlertSuccessfully.executor": "Run",
-    "JUnit.AlertControllerIntegrationTest.executor": "Run",
-    "JUnit.AlertCreationIntegrationTest.executor": "Run",
-    "JUnit.AlertServiceTest.executor": "Run",
-    "JUnit.KafkaFlowIntegrationTest.executor": "Run",
-    "JUnit.KafkaProducerConsumerIntegrationTest.executor": "Run",
-    "JUnit.KafkaProducerExampleApplicationTests.executor": "Run",
-    "JUnit.UserControllerIntegrationTest$UserRegistrationTests.executor": "Run",
-    "JUnit.UserControllerIntegrationTest$UserRegistrationTests.shouldRegisterNewUser.executor": "Run",
-    "JUnit.UserControllerIntegrationTest$UserRegistrationTests.shouldReturnBadRequestForMalformedJson.executor": "Run",
-    "JUnit.UserControllerIntegrationTest$UserRegistrationTests.shouldReturnConflictForDuplicateUser.executor": "Run",
-    "JUnit.UserControllerIntegrationTest.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RequestMappingsPanelOrder0": "0",
-    "RequestMappingsPanelOrder1": "1",
-    "RequestMappingsPanelWidth0": "75",
-    "RequestMappingsPanelWidth1": "75",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "Spring Boot.KinesisFlowApplication.executor": "Run",
-    "com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrary": "JUnit5",
-    "com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrarySuperClass.JUnit5": "",
-    "git-widget-placeholder": "main",
-    "ignore.virus.scanning.warn.message": "true",
-    "last_directory_selection": "C:/Users/Ouail/Documents/proyectos/kinesisFlow/src/test/java",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "onboarding.tips.debug.path": "C:/Users/Ouail/Documents/KinesisFlow/KinesisFlow/src/main/java/org/example/Main.java",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.KinesisFlowApplication.executor&quot;: &quot;Run&quot;,
+    &quot;Docker.infrastructure.kafka-ui: Compose Deployment.executor&quot;: &quot;Run&quot;,
+    &quot;Docker.infrastructure.kafka: Compose Deployment.executor&quot;: &quot;Run&quot;,
+    &quot;Docker.infrastructure.postgres: Compose Deployment.executor&quot;: &quot;Run&quot;,
+    &quot;Docker.infrastructure.zookeeper: Compose Deployment.executor&quot;: &quot;Run&quot;,
+    &quot;Docker.infrastructure: Compose Deployment.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AlertControllerIntegrationTest$AlertSubscriptionTests.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AlertControllerIntegrationTest$AlertSubscriptionTests.shouldSubscribeToAlertAndAddToRedis.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AlertControllerIntegrationTest$AlertSubscriptionTests.shouldSubscribeToAlertAndStoreInRedis.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AlertControllerIntegrationTest$AlertUnsubscriptionTests.shouldHandleUnsubscriptionFromNonExistentAlert.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AlertControllerIntegrationTest$AlertUnsubscriptionTests.shouldReturn404ForNonExistentAlert.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AlertControllerIntegrationTest$AuthenticationErrorTests.shouldReturn401ForInvalidToken.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AlertControllerIntegrationTest$ConflictErrorTests.shouldReturn409ForDuplicateUser.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AlertControllerIntegrationTest$EdgeCasesAndErrorHandlingTests.shouldHandleConcurrentSubscriptionRequests.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AlertControllerIntegrationTest$EdgeCasesAndErrorHandlingTests.shouldHandleMissingAuthorizationHeader.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AlertControllerIntegrationTest$SubscribeToAlertTests.shouldAddUserToExistingAlertSubscription.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AlertControllerIntegrationTest$SubscribeToAlertTests.shouldCreateNewAlertSubscriptionSuccessfully.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AlertControllerIntegrationTest$SubscribeToAlertTests.shouldReturn400WhenAlertDTOIsInvalid.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AlertControllerIntegrationTest$SubscribeToAlertTests.shouldReturn400WhenRequestBodyIsMalformedJson.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AlertControllerIntegrationTest$SubscribeToAlertTests.shouldReturn401WhenUserIsNotAuthenticated.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AlertControllerIntegrationTest$SubscribeToAlertTests.shouldReturn403WhenJwtTokenIsInvalid.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AlertControllerIntegrationTest$SubscribeToAlertTests.shouldReturn403WhenUserIsNotAuthenticated.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AlertControllerIntegrationTest$SubscribeToAlertTests.shouldReturn415WhenContentTypeIsNotJson.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AlertControllerIntegrationTest$SubscribeToAlertTests.shouldReturn500WhenUserDoesNotExist.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AlertControllerIntegrationTest$UnsubscribeFromAlertTests.shouldHandleUnsubscribeWhenUserIsNotSubscribedToAlert.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AlertControllerIntegrationTest$UnsubscribeFromAlertTests.shouldRemoveUserFromAlertWithMultipleSubscribers.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AlertControllerIntegrationTest$UnsubscribeFromAlertTests.shouldReturn400WhenAlertDTOIsInvalid.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AlertControllerIntegrationTest$UnsubscribeFromAlertTests.shouldReturn403WhenJwtTokenIsInvalid.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AlertControllerIntegrationTest$UnsubscribeFromAlertTests.shouldReturn403WhenUserIsNotAuthenticated.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AlertControllerIntegrationTest$UnsubscribeFromAlertTests.shouldUnsubscribeFromAlertSuccessfully.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AlertControllerIntegrationTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AlertCreationIntegrationTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AlertNotificationFlowIntegrationTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AlertNotificationFlowIntegrationTest.testCompleteFlowPriceIncrease.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AlertNotificationIntegrationTest$DlqFailureTests.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AlertNotificationIntegrationTest,testProcessingFailureRoutesToDlq and 1 more.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AlertNotificationIntegrationTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AlertNotificationIntegrationTest.testCompleteFlowPriceDecrease.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AlertNotificationIntegrationTest.testCompleteFlowPriceIncrease.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AlertNotificationIntegrationTest.testDLQFunctionalityWithMalformedEvent.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AlertNotificationIntegrationTest.testDeserializationFailureRoutesToDlq.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AlertNotificationIntegrationTest.testNoDlqWhenProcessingSucceeds.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AlertNotificationIntegrationTest.testProcessingFailureRoutesToDlq.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AlertServiceTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.KafkaFlowIntegrationTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.KafkaIntegrationTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.KafkaProducerConsumerIntegrationTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.KafkaProducerExampleApplicationTests.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.UserControllerIntegrationTest$UserRegistrationTests.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.UserControllerIntegrationTest$UserRegistrationTests.shouldRegisterNewUser.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.UserControllerIntegrationTest$UserRegistrationTests.shouldReturnBadRequestForMalformedJson.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.UserControllerIntegrationTest$UserRegistrationTests.shouldReturnConflictForDuplicateUser.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.UserControllerIntegrationTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.java in kinesisFlow.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.kinesisflow in kinesisFlow.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;Spring Boot.KinesisFlowApplication.executor&quot;: &quot;Run&quot;,
+    &quot;com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrary&quot;: &quot;JUnit5&quot;,
+    &quot;com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrarySuperClass.JUnit5&quot;: &quot;&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;last_directory_selection&quot;: &quot;C:/Users/Ouail/Documents/proyectos/kinesisFlow/src/test/java&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;onboarding.tips.debug.path&quot;: &quot;C:/Users/Ouail/Documents/KinesisFlow/KinesisFlow/src/main/java/org/example/Main.java&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
-  "keyToStringList": {
-    "DatabaseDriversLRU": [
-      "postgresql"
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;postgresql&quot;
     ]
   }
-}]]></component>
+}</component>
+  <component name="ReactorSettings">
+    <option name="notificationShown" value="true" />
+  </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\Ouail\Documents\proyectos\kinesisFlow\src\main\resources" />
@@ -155,8 +181,8 @@
       <recent name="org.example.kinesisflow.controller" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.AlertControllerIntegrationTest">
-    <configuration name="AlertControllerIntegrationTest$AlertUnsubscriptionTests.shouldReturn404ForNonExistentAlert" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="JUnit.java in kinesisFlow">
+    <configuration name="AlertNotificationIntegrationTest$DlqFailureTests" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="kinesisFlow" />
       <extension name="coverage">
         <pattern>
@@ -164,47 +190,14 @@
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
-      <option name="PACKAGE_NAME" value="org.example.kinesisflow.AlertControllerIntegrationTest" />
-      <option name="MAIN_CLASS_NAME" value="org.example.kinesisflow.AlertControllerIntegrationTest$AlertUnsubscriptionTests" />
-      <option name="METHOD_NAME" value="shouldReturn404ForNonExistentAlert" />
-      <option name="TEST_OBJECT" value="method" />
+      <option name="PACKAGE_NAME" value="org.example.kinesisflow.AlertNotificationIntegrationTest" />
+      <option name="MAIN_CLASS_NAME" value="org.example.kinesisflow.AlertNotificationIntegrationTest$DlqFailureTests" />
+      <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="AlertControllerIntegrationTest$AuthenticationErrorTests.shouldReturn401ForInvalidToken" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="kinesisFlow" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="org.example.kinesisflow.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="org.example.kinesisflow.AlertControllerIntegrationTest" />
-      <option name="MAIN_CLASS_NAME" value="org.example.kinesisflow.AlertControllerIntegrationTest$AuthenticationErrorTests" />
-      <option name="METHOD_NAME" value="shouldReturn401ForInvalidToken" />
-      <option name="TEST_OBJECT" value="method" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="AlertControllerIntegrationTest$ConflictErrorTests.shouldReturn409ForDuplicateUser" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="kinesisFlow" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="org.example.kinesisflow.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="org.example.kinesisflow.AlertControllerIntegrationTest" />
-      <option name="MAIN_CLASS_NAME" value="org.example.kinesisflow.AlertControllerIntegrationTest$ConflictErrorTests" />
-      <option name="METHOD_NAME" value="shouldReturn409ForDuplicateUser" />
-      <option name="TEST_OBJECT" value="method" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="AlertControllerIntegrationTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="AlertNotificationIntegrationTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="kinesisFlow" />
       <extension name="coverage">
         <pattern>
@@ -213,13 +206,13 @@
         </pattern>
       </extension>
       <option name="PACKAGE_NAME" value="org.example.kinesisflow" />
-      <option name="MAIN_CLASS_NAME" value="org.example.kinesisflow.AlertControllerIntegrationTest" />
+      <option name="MAIN_CLASS_NAME" value="org.example.kinesisflow.AlertNotificationIntegrationTest" />
       <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="UserControllerIntegrationTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="AlertNotificationIntegrationTest.testCompleteFlowPriceDecrease" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="kinesisFlow" />
       <extension name="coverage">
         <pattern>
@@ -228,8 +221,25 @@
         </pattern>
       </extension>
       <option name="PACKAGE_NAME" value="org.example.kinesisflow" />
-      <option name="MAIN_CLASS_NAME" value="org.example.kinesisflow.UserControllerIntegrationTest" />
-      <option name="TEST_OBJECT" value="class" />
+      <option name="MAIN_CLASS_NAME" value="org.example.kinesisflow.AlertNotificationIntegrationTest" />
+      <option name="METHOD_NAME" value="testCompleteFlowPriceDecrease" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="java in kinesisFlow" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="kinesisFlow" />
+      <option name="TEST_OBJECT" value="directory" />
+      <dir value="$PROJECT_DIR$/src/test/java" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="kinesisflow in kinesisFlow" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="kinesisFlow" />
+      <option name="TEST_OBJECT" value="directory" />
+      <dir value="$PROJECT_DIR$/src/test/java/org/example/kinesisflow" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -250,11 +260,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="JUnit.AlertControllerIntegrationTest" />
-        <item itemvalue="JUnit.UserControllerIntegrationTest" />
-        <item itemvalue="JUnit.AlertControllerIntegrationTest$AlertUnsubscriptionTests.shouldReturn404ForNonExistentAlert" />
-        <item itemvalue="JUnit.AlertControllerIntegrationTest$AuthenticationErrorTests.shouldReturn401ForInvalidToken" />
-        <item itemvalue="JUnit.AlertControllerIntegrationTest$ConflictErrorTests.shouldReturn409ForDuplicateUser" />
+        <item itemvalue="JUnit.java in kinesisFlow" />
+        <item itemvalue="JUnit.kinesisflow in kinesisFlow" />
+        <item itemvalue="JUnit.AlertNotificationIntegrationTest.testCompleteFlowPriceDecrease" />
+        <item itemvalue="JUnit.AlertNotificationIntegrationTest" />
+        <item itemvalue="JUnit.AlertNotificationIntegrationTest$DlqFailureTests" />
       </list>
     </recent_temporary>
   </component>
@@ -295,7 +305,15 @@
       <workItem from="1752581018432" duration="3634000" />
       <workItem from="1752593196450" duration="3672000" />
       <workItem from="1752691536122" duration="1000000" />
-      <workItem from="1752743331169" duration="11329000" />
+      <workItem from="1752743331169" duration="13006000" />
+      <workItem from="1752859820721" duration="4910000" />
+      <workItem from="1752864812898" duration="2174000" />
+      <workItem from="1752924032444" duration="14106000" />
+      <workItem from="1752952592359" duration="2757000" />
+      <workItem from="1753043624022" duration="644000" />
+      <workItem from="1753044306186" duration="1503000" />
+      <workItem from="1753107232473" duration="161000" />
+      <workItem from="1753108200894" duration="830000" />
     </task>
     <task id="LOCAL-00001" summary="created docker compose for kafka + tested creating a topic">
       <option name="closed" value="true" />
@@ -433,7 +451,15 @@
       <option name="project" value="LOCAL" />
       <updated>1752598379671</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="finished testing the alert controller, added erro handling kafka consumer and producer aswell as redis pub sub. added retries in alert controller listener">
+      <option name="closed" value="true" />
+      <created>1752763494896</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1752763494896</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -457,7 +483,9 @@
     <MESSAGE value="implementing websockets and redis pub sub" />
     <MESSAGE value="implemented the pipeline" />
     <MESSAGE value="implementing more robust controller responses, error handling. and rewriting some tests" />
-    <option name="LAST_COMMIT_MESSAGE" value="implementing more robust controller responses, error handling. and rewriting some tests" />
+    <MESSAGE value="finished testing the alert controller, added erro handling kafka consumer and producer aswell as redis pub sub. added retries in alert controller listener" />
+    <MESSAGE value="finished testing dlq" />
+    <option name="LAST_COMMIT_MESSAGE" value="finished testing dlq" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -469,5 +497,9 @@
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
   </component>
 </project>

@@ -7,8 +7,5 @@ import org.springframework.kafka.annotation.EnableKafka;
 @SpringBootTest
 class KinesisFlowApplicationTests {
 
-    @Test
-    void contextLoads() {
-    }
 
 }
