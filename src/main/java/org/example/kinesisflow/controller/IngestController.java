@@ -1,6 +1,6 @@
 package org.example.kinesisflow.controller;
 import jakarta.validation.Valid;
-import org.example.kinesisflow.record.cryptoEvent;
+import org.example.kinesisflow.record.CryptoEvent;
 import org.example.kinesisflow.service.KafkaProducerService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,9 +20,9 @@ public class IngestController {
 
 
     @PostMapping("/ingest")
-    public ResponseEntity<String> sendMessage(@RequestBody cryptoEvent event) {
+    public ResponseEntity<String> sendMessage(@RequestBody @Valid CryptoEvent event) {
         producerService.send(event);
-        return ResponseEntity.ok("Mensaje enviado a Kafka");
+        return ResponseEntity.ok("Message sent to Kafka");
     }
 
 }

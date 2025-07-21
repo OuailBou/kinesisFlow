@@ -17,7 +17,7 @@ public class KafkaDLQConfig {
         DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(kafkaTemplate,
                 (record, ex) -> new TopicPartition(STR."\{record.topic()}-DLQ", record.partition()));
 
-        FixedBackOff backOff = new FixedBackOff(100L, 2);
+        FixedBackOff backOff = new FixedBackOff(1000L, 3);
 
         return new DefaultErrorHandler(recoverer, backOff);
     }

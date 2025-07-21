@@ -8,6 +8,7 @@ import org.example.kinesisflow.model.User;
 import org.example.kinesisflow.service.RedisSortedSetService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
 import org.springframework.dao.DataAccessException;
 import org.springframework.retry.annotation.Backoff;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
+@Profile("!test")
 @Component
 public class AlertDomainEventListener {
 
@@ -30,8 +32,7 @@ public class AlertDomainEventListener {
     }
 
     @Async
-    @EventListener
-    // FOR TESTING @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Retryable(retryFor = DataAccessException.class, maxAttempts = 4, backoff = @Backoff(delay = 1000, multiplier = 2))
     public void handleUserSubscribed(UserSubscribedToAlertEvent event) {
         logger.info("Sync subscription to Redis for user: {}, alertId: {}",
@@ -59,8 +60,7 @@ public class AlertDomainEventListener {
     }
 
     @Async
-    @EventListener
-    //@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Retryable(retryFor = DataAccessException.class, maxAttempts = 4, backoff = @Backoff(delay = 1000, multiplier = 2))
     public void handleUserUnsubscribed(UserUnsubscribedFromAlertEvent event) {
         logger.info("Sync unsubscription to Redis for user: {}, alertId: {}",

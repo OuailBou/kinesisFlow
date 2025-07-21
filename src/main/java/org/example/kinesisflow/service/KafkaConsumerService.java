@@ -1,7 +1,7 @@
 package org.example.kinesisflow.service;
 
 import org.example.kinesisflow.mapper.EventToNotificationMapper;
-import org.example.kinesisflow.record.cryptoEvent;
+import org.example.kinesisflow.record.CryptoEvent;
 import org.example.kinesisflow.websocket.RedisMessagePublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,11 +36,11 @@ public class KafkaConsumerService {
             id = "kinesis-listener",
             topics = "raw-market-data",
             groupId = "kinesis-group",
-            concurrency = "3",
+            concurrency = "1",
             containerFactory = "kafkaListenerContainerFactory"
     )
     @Transactional
-    public void listen(cryptoEvent cryptoEvent) {
+    public void listen(CryptoEvent cryptoEvent) {
         log.info("Message received: {}", cryptoEvent);
 
 
@@ -48,7 +48,7 @@ public class KafkaConsumerService {
 
     }
 
-    private void processCryptoEvent(cryptoEvent cryptoEvent) {
+    private void processCryptoEvent(CryptoEvent cryptoEvent) {
         Optional<BigDecimal> formerPrice = getPreviousPrice(cryptoEvent.asset());
 
         if (formerPrice.isEmpty()) {
@@ -73,12 +73,12 @@ public class KafkaConsumerService {
         return price != null ? Optional.of(BigDecimal.valueOf(price)) : Optional.empty();
     }
 
-    private void savePriceAndReturn(cryptoEvent cryptoEvent) {
+    private void savePriceAndReturn(CryptoEvent cryptoEvent) {
         redisStringService.save(cryptoEvent.asset(), cryptoEvent.price());
         log.debug("Saved initial price for asset: {}", cryptoEvent.asset());
     }
 
-    private List<String> getAffectedUsers(cryptoEvent cryptoEvent, BigDecimal formerPrice) {
+    private List<String> getAffectedUsers(CryptoEvent cryptoEvent, BigDecimal formerPrice) {
         PriceComparison comparison = comparePrices(cryptoEvent.price(), formerPrice);
 
         return switch (comparison) {
@@ -127,7 +127,7 @@ public class KafkaConsumerService {
         return Optional.of(value.split(":")[0]);
     }
 
-    private void processAffectedUsers(List<String> users, cryptoEvent cryptoEvent) {
+    private void processAffectedUsers(List<String> users, CryptoEvent cryptoEvent) {
         log.info("Processing {} affected user", users.getFirst());
 
         users.forEach(u -> redisMessagePublisher.publish("alerts", EventToNotificationMapper.mapToNotification(cryptoEvent, u)));
@@ -137,7 +137,7 @@ public class KafkaConsumerService {
 
 
 
-    private void updateCurrentPrice(cryptoEvent cryptoEvent) {
+    private void updateCurrentPrice(CryptoEvent cryptoEvent) {
         redisStringService.save(cryptoEvent.asset(), cryptoEvent.price());
         log.debug("Updated current price for asset: {}", cryptoEvent.asset());
     }

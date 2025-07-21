@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.kinesisflow.dto.AlertDTO;
 import org.example.kinesisflow.dto.UserDTO;
 import org.example.kinesisflow.listener.DlqListener;
-import org.example.kinesisflow.record.cryptoEvent;
+import org.example.kinesisflow.record.CryptoEvent;
 import org.example.kinesisflow.service.RedisSortedSetService;
 import org.example.kinesisflow.service.RedisStringService;
 import org.example.kinesisflow.websocket.NotifierWebSocketHandler;
@@ -18,6 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -43,6 +44,7 @@ import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
+@ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @AutoConfigureMockMvc
 @Testcontainers
@@ -82,7 +84,7 @@ class AlertNotificationIntegrationTest {
     private RedisSortedSetService redisSortedSetService;
 
     @Autowired
-    private KafkaTemplate<String, cryptoEvent> kafkaTemplate;
+    private KafkaTemplate<String, CryptoEvent> kafkaTemplate;
 
     @SpyBean
     private NotifierWebSocketHandler webSocketHandler;
@@ -203,7 +205,7 @@ class AlertNotificationIntegrationTest {
     }
 
     private void sendCryptoEvent(String asset, BigDecimal price) throws Exception {
-        cryptoEvent event = new cryptoEvent(asset, price, Instant.now().toEpochMilli());
+        CryptoEvent event = new CryptoEvent(asset, price, Instant.now().toEpochMilli());
         mockMvc.perform(post(INGEST_ENDPOINT)
                         .header("Authorization", "Bearer " + jwtToken)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -364,7 +366,7 @@ class AlertNotificationIntegrationTest {
                 .when(redisStringService).get(anyString());
 
         try {
-            cryptoEvent validEvent = new cryptoEvent("BTC", new BigDecimal("70000"), System.currentTimeMillis());
+            CryptoEvent validEvent = new CryptoEvent("BTC", new BigDecimal("70000"), System.currentTimeMillis());
             dlqListener.clearMessages();
 
             kafkaTemplate.send("raw-market-data", validEvent.asset(), validEvent);
@@ -382,7 +384,7 @@ class AlertNotificationIntegrationTest {
     @Order(7)
     @DisplayName("Successful processing does not route to DLQ")
     void testSuccessfulProcessingDoesNotRouteToDelq() {
-        cryptoEvent validEvent = new cryptoEvent("BTC", new BigDecimal("70000"), System.currentTimeMillis());
+        CryptoEvent validEvent = new CryptoEvent("BTC", new BigDecimal("70000"), System.currentTimeMillis());
         dlqListener.clearMessages();
 
         kafkaTemplate.send("raw-market-data", validEvent.asset(), validEvent);
