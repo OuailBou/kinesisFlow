@@ -8,7 +8,6 @@ import org.example.kinesisflow.record.CryptoEvent;
 import org.example.kinesisflow.service.RedisSortedSetService;
 import org.example.kinesisflow.service.RedisStringService;
 import org.example.kinesisflow.websocket.NotifierWebSocketHandler;
-import org.example.kinesisflow.websocket.CustomWebSocketClient;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +43,7 @@ import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
-@ActiveProfiles("test")
+@ActiveProfiles({"dev", "test"})
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @AutoConfigureMockMvc
 @Testcontainers

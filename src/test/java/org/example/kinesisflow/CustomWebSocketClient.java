@@ -1,4 +1,4 @@
-package org.example.kinesisflow.websocket;
+package org.example.kinesisflow;
 
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
