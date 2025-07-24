@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ActiveProfiles({"dev", "test"})
+@ActiveProfiles("test")  // SOLO test
 @Transactional
 @SpringBootTest
 @Testcontainers

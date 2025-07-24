@@ -59,6 +59,9 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-
+    @GetMapping("/h")
+    public ResponseEntity<String> health() {
+        return ResponseEntity.ok("OK");
+    }
 
 }

@@ -4,22 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d483ce6d-440c-4168-a45c-3ac57b477076" name="Changes" comment="added flyway migration">
-      <change afterPath="$PROJECT_DIR$/infrastructure/Dockerfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/infrastructure/docker-compose.dev.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/config/DataSourceConfig.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/application-prod.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/infrastructure/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/infrastructure/docker-compose.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/websocket/CustomWebSocketClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/org/example/kinesisflow/CustomWebSocketClient.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application-dev.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/logback-spring.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/logback-spring.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/org/example/kinesisflow/AlertControllerIntegrationTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/org/example/kinesisflow/AlertControllerIntegrationTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/org/example/kinesisflow/AlertNotificationIntegrationTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/org/example/kinesisflow/AlertNotificationIntegrationTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/org/example/kinesisflow/KinesisFlowApplicationTests.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/org/example/kinesisflow/KinesisFlowApplicationTests.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/org/example/kinesisflow/UserControllerIntegrationTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/org/example/kinesisflow/UserControllerIntegrationTest.java" afterDir="false" />
-    </list>
+    <list default="true" id="d483ce6d-440c-4168-a45c-3ac57b477076" name="Changes" comment="first deployed version and testing ci pipeline" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -30,8 +15,8 @@
       <list>
         <option value="Interface" />
         <option value="JUnit5 Test Class" />
-        <option value="Class" />
         <option value="Dockerfile" />
+        <option value="Class" />
       </list>
     </option>
   </component>
@@ -191,9 +176,43 @@
       <recent name="org.example.kinesisflow.controller" />
     </key>
   </component>
-  <component name="RunManager" selected="Docker.infrastructure: Compose Deployment">
+  <component name="RunManager" selected="JUnit.kinesisflow in kinesisFlow">
+    <configuration name="AlertControllerIntegrationTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="kinesisFlow" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.example.kinesisflow.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="org.example.kinesisflow" />
+      <option name="MAIN_CLASS_NAME" value="org.example.kinesisflow.AlertControllerIntegrationTest" />
+      <option name="METHOD_NAME" value="" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="AlertNotificationIntegrationTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="kinesisFlow" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.example.kinesisflow.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="org.example.kinesisflow" />
+      <option name="MAIN_CLASS_NAME" value="org.example.kinesisflow.AlertNotificationIntegrationTest" />
+      <option name="METHOD_NAME" value="" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="kinesisflow in kinesisFlow" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="kinesisFlow" />
+      <option name="MAIN_CLASS_NAME" value="" />
+      <option name="METHOD_NAME" value="" />
       <option name="TEST_OBJECT" value="directory" />
       <dir value="$PROJECT_DIR$/src/test/java/org/example/kinesisflow" />
       <method v="2">
@@ -201,7 +220,6 @@
       </method>
     </configuration>
     <configuration name="KinesisFlowApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
-      <option name="ACTIVE_PROFILES" value="dev" />
       <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
       <module name="kinesisFlow" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="org.example.kinesisflow.KinesisFlowApplication" />
@@ -248,48 +266,22 @@
       </deployment>
       <method v="2" />
     </configuration>
-    <configuration name="infrastructure.postgres: Compose Deployment" type="docker-deploy" factoryName="docker-compose.yml" temporary="true" server-name="Docker">
-      <deployment type="docker-compose.yml">
-        <settings>
-          <option name="services">
-            <list>
-              <option value="postgres" />
-            </list>
-          </option>
-          <option name="sourceFilePath" value="infrastructure/docker-compose.yml" />
-        </settings>
-      </deployment>
-      <method v="2" />
-    </configuration>
-    <configuration name="infrastructure.redis: Compose Deployment" type="docker-deploy" factoryName="docker-compose.yml" temporary="true" server-name="Docker">
-      <deployment type="docker-compose.yml">
-        <settings>
-          <option name="services">
-            <list>
-              <option value="redis" />
-            </list>
-          </option>
-          <option name="sourceFilePath" value="infrastructure/docker-compose.yml" />
-        </settings>
-      </deployment>
-      <method v="2" />
-    </configuration>
     <list>
       <item itemvalue="Docker.KinesisFlow Docker" />
-      <item itemvalue="Docker.infrastructure.postgres: Compose Deployment" />
-      <item itemvalue="Docker.infrastructure.redis: Compose Deployment" />
       <item itemvalue="Docker.infrastructure/docker-compose.dev.yml: Compose Deployment" />
       <item itemvalue="Docker.infrastructure: Compose Deployment" />
+      <item itemvalue="JUnit.AlertNotificationIntegrationTest" />
+      <item itemvalue="JUnit.AlertControllerIntegrationTest" />
       <item itemvalue="JUnit.kinesisflow in kinesisFlow" />
       <item itemvalue="Spring Boot.KinesisFlowApplication" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Docker.infrastructure: Compose Deployment" />
         <item itemvalue="JUnit.kinesisflow in kinesisFlow" />
+        <item itemvalue="JUnit.AlertNotificationIntegrationTest" />
         <item itemvalue="Docker.infrastructure/docker-compose.dev.yml: Compose Deployment" />
-        <item itemvalue="Docker.infrastructure.redis: Compose Deployment" />
-        <item itemvalue="Docker.infrastructure.postgres: Compose Deployment" />
+        <item itemvalue="JUnit.AlertControllerIntegrationTest" />
+        <item itemvalue="Docker.infrastructure: Compose Deployment" />
       </list>
     </recent_temporary>
   </component>
@@ -346,6 +338,20 @@
       <workItem from="1753199921070" duration="3853000" />
       <workItem from="1753204046981" duration="4063000" />
       <workItem from="1753208958517" duration="3945000" />
+      <workItem from="1753214028980" duration="138000" />
+      <workItem from="1753266019674" duration="1160000" />
+      <workItem from="1753268017504" duration="2474000" />
+      <workItem from="1753272569157" duration="67000" />
+      <workItem from="1753273321983" duration="26000" />
+      <workItem from="1753275027432" duration="32000" />
+      <workItem from="1753275956145" duration="2092000" />
+      <workItem from="1753279834790" duration="546000" />
+      <workItem from="1753280885436" duration="1089000" />
+      <workItem from="1753284120283" duration="3029000" />
+      <workItem from="1753287437233" duration="1298000" />
+      <workItem from="1753360250683" duration="3512000" />
+      <workItem from="1753365633867" duration="452000" />
+      <workItem from="1753378282383" duration="2435000" />
     </task>
     <task id="LOCAL-00001" summary="created docker compose for kafka + tested creating a topic">
       <option name="closed" value="true" />
@@ -507,7 +513,127 @@
       <option name="project" value="LOCAL" />
       <updated>1753120741587</updated>
     </task>
-    <option name="localTasksCounter" value="21" />
+    <task id="LOCAL-00021" summary="project ready for deployment">
+      <option name="closed" value="true" />
+      <created>1753214157691</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1753214157691</updated>
+    </task>
+    <task id="LOCAL-00022" summary="first deployed version and testing ci pipeline">
+      <option name="closed" value="true" />
+      <created>1753360545148</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1753360545148</updated>
+    </task>
+    <task id="LOCAL-00023" summary="first deployed version and testing ci pipeline">
+      <option name="closed" value="true" />
+      <created>1753361001924</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1753361001924</updated>
+    </task>
+    <task id="LOCAL-00024" summary="first deployed version and testing ci pipeline">
+      <option name="closed" value="true" />
+      <created>1753361293208</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1753361293208</updated>
+    </task>
+    <task id="LOCAL-00025" summary="first deployed version and testing ci pipeline">
+      <option name="closed" value="true" />
+      <created>1753361356399</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1753361356399</updated>
+    </task>
+    <task id="LOCAL-00026" summary="first deployed version and testing ci pipeline">
+      <option name="closed" value="true" />
+      <created>1753361769623</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1753361769623</updated>
+    </task>
+    <task id="LOCAL-00027" summary="first deployed version and testing ci pipeline">
+      <option name="closed" value="true" />
+      <created>1753363987274</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1753363987274</updated>
+    </task>
+    <task id="LOCAL-00028" summary="first deployed version and testing ci pipeline">
+      <option name="closed" value="true" />
+      <created>1753364519382</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1753364519382</updated>
+    </task>
+    <task id="LOCAL-00029" summary="first deployed version and testing ci pipeline">
+      <option name="closed" value="true" />
+      <created>1753364944771</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1753364944771</updated>
+    </task>
+    <task id="LOCAL-00030" summary="first deployed version and testing ci pipeline">
+      <option name="closed" value="true" />
+      <created>1753365733397</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1753365733397</updated>
+    </task>
+    <task id="LOCAL-00031" summary="first deployed version and testing ci pipeline">
+      <option name="closed" value="true" />
+      <created>1753378822093</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1753378822093</updated>
+    </task>
+    <task id="LOCAL-00032" summary="first deployed version and testing ci pipeline">
+      <option name="closed" value="true" />
+      <created>1753378946006</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1753378946006</updated>
+    </task>
+    <task id="LOCAL-00033" summary="first deployed version and testing ci pipeline">
+      <option name="closed" value="true" />
+      <created>1753379680534</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1753379680534</updated>
+    </task>
+    <task id="LOCAL-00034" summary="first deployed version and testing ci pipeline">
+      <option name="closed" value="true" />
+      <created>1753379803936</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1753379803936</updated>
+    </task>
+    <task id="LOCAL-00035" summary="first deployed version and testing ci pipeline">
+      <option name="closed" value="true" />
+      <created>1753380539670</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1753380539670</updated>
+    </task>
+    <option name="localTasksCounter" value="36" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -534,7 +660,9 @@
     <MESSAGE value="finished testing the alert controller, added erro handling kafka consumer and producer aswell as redis pub sub. added retries in alert controller listener" />
     <MESSAGE value="finished testing dlq" />
     <MESSAGE value="added flyway migration" />
-    <option name="LAST_COMMIT_MESSAGE" value="added flyway migration" />
+    <MESSAGE value="project ready for deployment" />
+    <MESSAGE value="first deployed version and testing ci pipeline" />
+    <option name="LAST_COMMIT_MESSAGE" value="first deployed version and testing ci pipeline" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
