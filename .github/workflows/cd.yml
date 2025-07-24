@@ -29,7 +29,8 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t kinesisflow ./infrastructure
+          docker build -f ./infrastructure/Dockerfile -t kinesisflow .
+
 
       - name: Tag Docker image
         run: |
