@@ -1,5 +1,4 @@
 name: CD - Deploy to AWS
-
 on:
   push:
     branches:
@@ -7,17 +6,22 @@ on:
 
 jobs:
   deploy:
+    name: Deploy to ECS 🚀
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write   # Requerido para OIDC
+      contents: read    # Requerido para checkout
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::719830632894:role/github
           aws-region: eu-west-3
+          role-session-name: GitHubActions-${{ github.run_id }}
 
       - name: Login to ECR
         run: |
@@ -30,10 +34,12 @@ jobs:
       - name: Tag Docker image
         run: |
           docker tag kinesisflow:latest 719830632894.dkr.ecr.eu-west-3.amazonaws.com/kinesisflow:latest
+          docker tag kinesisflow:latest 719830632894.dkr.ecr.eu-west-3.amazonaws.com/kinesisflow:sha-${{ github.sha }}
 
       - name: Push Docker image to ECR
         run: |
           docker push 719830632894.dkr.ecr.eu-west-3.amazonaws.com/kinesisflow:latest
+          docker push 719830632894.dkr.ecr.eu-west-3.amazonaws.com/kinesisflow:sha-${{ github.sha }}
 
       - name: Update ECS service
         run: |
@@ -42,3 +48,13 @@ jobs:
             --service kinesisflow-service-2nstaxjv \
             --region eu-west-3 \
             --force-new-deployment
+
+      - name: Wait for deployment to complete
+        run: |
+          echo "Waiting for ECS service to stabilize..."
+          aws ecs wait services-stable \
+            --cluster gentle-turtle-fa4hpz \
+            --services kinesisflow-service-2nstaxjv \
+            --region eu-west-3 \
+            --max-attempts 30 \
+            --delay 30

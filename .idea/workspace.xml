@@ -4,9 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d483ce6d-440c-4168-a45c-3ac57b477076" name="Changes" comment="first deployed version and testing ci pipeline">
-      <change afterPath="$PROJECT_DIR$/.github/workflows/cd.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="d483ce6d-440c-4168-a45c-3ac57b477076" name="Changes" comment="testing ci/cd pipeline">
+      <change beforePath="$PROJECT_DIR$/.github/workflows/cd.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/cd.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -356,7 +355,7 @@
       <workItem from="1753360250683" duration="3512000" />
       <workItem from="1753365633867" duration="452000" />
       <workItem from="1753378282383" duration="4037000" />
-      <workItem from="1753385307135" duration="757000" />
+      <workItem from="1753385307135" duration="1177000" />
     </task>
     <task id="LOCAL-00001" summary="created docker compose for kafka + tested creating a topic">
       <option name="closed" value="true" />
@@ -654,7 +653,15 @@
       <option name="project" value="LOCAL" />
       <updated>1753381110646</updated>
     </task>
-    <option name="localTasksCounter" value="38" />
+    <task id="LOCAL-00038" summary="testing ci/cd pipeline">
+      <option name="closed" value="true" />
+      <created>1753386105278</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1753386105278</updated>
+    </task>
+    <option name="localTasksCounter" value="39" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -683,7 +690,8 @@
     <MESSAGE value="added flyway migration" />
     <MESSAGE value="project ready for deployment" />
     <MESSAGE value="first deployed version and testing ci pipeline" />
-    <option name="LAST_COMMIT_MESSAGE" value="first deployed version and testing ci pipeline" />
+    <MESSAGE value="testing ci/cd pipeline" />
+    <option name="LAST_COMMIT_MESSAGE" value="testing ci/cd pipeline" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
