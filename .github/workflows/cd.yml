@@ -1,0 +1,44 @@
+name: CD - Deploy to AWS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::719830632894:role/github
+          aws-region: eu-west-3
+
+      - name: Login to ECR
+        run: |
+          aws ecr get-login-password --region eu-west-3 | docker login --username AWS --password-stdin 719830632894.dkr.ecr.eu-west-3.amazonaws.com
+
+      - name: Build Docker image
+        run: |
+          docker build -t kinesisflow ./infrastructure
+
+      - name: Tag Docker image
+        run: |
+          docker tag kinesisflow:latest 719830632894.dkr.ecr.eu-west-3.amazonaws.com/kinesisflow:latest
+
+      - name: Push Docker image to ECR
+        run: |
+          docker push 719830632894.dkr.ecr.eu-west-3.amazonaws.com/kinesisflow:latest
+
+      - name: Update ECS service
+        run: |
+          aws ecs update-service \
+            --cluster gentle-turtle-fa4hpz \
+            --service kinesisflow-service-2nstaxjv \
+            --region eu-west-3 \
+            --force-new-deployment
