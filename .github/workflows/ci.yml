@@ -10,6 +10,7 @@ on:
 
 jobs:
   build-and-test:
+    name: Maven Build & Test ✅
     runs-on: ubuntu-latest
 
     env:

@@ -43,7 +43,7 @@ import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
-@ActiveProfiles("test")  // SOLO test
+@ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @AutoConfigureMockMvc
 @Testcontainers
