@@ -63,5 +63,9 @@ public class UserController {
     public ResponseEntity<String> health() {
         return ResponseEntity.ok("OK");
     }
+    @GetMapping("/CDOK")
+    public ResponseEntity<String> testCD() {
+        return ResponseEntity.ok("OK");
+    }
 
 }
