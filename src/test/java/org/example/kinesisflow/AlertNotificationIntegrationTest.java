@@ -128,6 +128,8 @@ class AlertNotificationIntegrationTest {
         if (webSocketClient != null && !webSocketClient.isClosed()) {
             webSocketClient.close();
         }
+        receivedMessages.clear();
+
     }
 
     private void createTestUser() throws Exception {

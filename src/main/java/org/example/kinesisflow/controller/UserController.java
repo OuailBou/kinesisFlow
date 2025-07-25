@@ -63,7 +63,7 @@ public class UserController {
     public ResponseEntity<String> health() {
         return ResponseEntity.ok("OK");
     }
-    @GetMapping("/CHECK_V1")
+    @GetMapping("/CHECK_V2")
     public ResponseEntity<String> testCD() {
         return ResponseEntity.ok("OK");
     }
