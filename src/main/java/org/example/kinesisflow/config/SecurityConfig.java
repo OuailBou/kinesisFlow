@@ -45,6 +45,7 @@ public class SecurityConfig {
                 // Configure endpoint authorization
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
+                        .requestMatchers("/ingest").permitAll()
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/ws/notifications/**").permitAll()
 
