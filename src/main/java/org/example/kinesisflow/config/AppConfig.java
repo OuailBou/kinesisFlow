@@ -20,7 +20,7 @@ AppConfig  {
     @Bean
     public NewTopic topic1() {
         return TopicBuilder.name("raw-market-data")
-                .partitions(3)
+                .partitions(12)
                 .replicas(1)
                 .compact()
                 .build();

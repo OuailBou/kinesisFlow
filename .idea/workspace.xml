@@ -4,10 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d483ce6d-440c-4168-a45c-3ac57b477076" name="Changes" comment="adding prometheus and micrometer config">
+    <list default="true" id="d483ce6d-440c-4168-a45c-3ac57b477076" name="Changes" comment="opened actuator endpoint without auth">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/config/SecurityConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application-dev.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application-dev.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -348,15 +346,12 @@
       <workItem from="1753523100604" duration="829000" />
       <workItem from="1753611788433" duration="4298000" />
       <workItem from="1753696133511" duration="6345000" />
-      <workItem from="1753704223752" duration="657000" />
-    </task>
-    <task id="LOCAL-00002" summary="implemented serialization and desarialization of both the consumer and the producer- &amp;&amp; added a service and a controller layer, the controller has a post handler that acts as a producer">
-      <option name="closed" value="true" />
-      <created>1751373945911</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1751373945911</updated>
+      <workItem from="1753704223752" duration="1930000" />
+      <workItem from="1753707613862" duration="1759000" />
+      <workItem from="1753720204613" duration="11000" />
+      <workItem from="1753720746865" duration="88000" />
+      <workItem from="1753721091412" duration="9000" />
+      <workItem from="1753724902736" duration="12000" />
     </task>
     <task id="LOCAL-00003" summary="added a postgresql on docker compose &amp;&amp; added an alert table, and a controller">
       <option name="closed" value="true" />
@@ -742,14 +737,21 @@
       <option name="project" value="LOCAL" />
       <updated>1753699381355</updated>
     </task>
-    <option name="localTasksCounter" value="51" />
+    <task id="LOCAL-00051" summary="opened actuator endpoint withour auth">
+      <option name="closed" value="true" />
+      <created>1753705123584</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1753705123584</updated>
+    </task>
+    <option name="localTasksCounter" value="52" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="created docker compose for kafka + tested creating a topic" />
     <MESSAGE value="implemented serialization and desarialization of both the consumer and the producer- &amp;&amp; added a service and a controller layer, the controller has a post handler that acts as a producer" />
     <MESSAGE value="added a postgresql on docker compose &amp;&amp; added an alert table, and a controller" />
     <MESSAGE value="Add full Kafka integration test, alert DTO, and controller test and logs&#10;&#10;- Introduced a complete integration test covering the main data flow from Kafka message production to its consumption and processing by the consumer service.&#10;- Used Testcontainers to spin up isolated Kafka and PostgreSQL instances for portable, environment-independent testing.&#10;- Fixed a critical race condition on test startup by synchronizing the test thread with the Kafka listener using a `@BeforeEach` block, `KafkaListenerEndpointRegistry`, and Awaitility.&#10;&#10;- Added Alert DTO.&#10;- Added and tested AlertController." />
@@ -774,7 +776,8 @@
     <MESSAGE value="testing ci/cd pipeline" />
     <MESSAGE value="preparing load tests" />
     <MESSAGE value="adding prometheus and micrometer config" />
-    <option name="LAST_COMMIT_MESSAGE" value="adding prometheus and micrometer config" />
+    <MESSAGE value="opened actuator endpoint withour auth" />
+    <option name="LAST_COMMIT_MESSAGE" value="opened actuator endpoint withour auth" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
