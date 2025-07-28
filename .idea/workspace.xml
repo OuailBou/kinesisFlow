@@ -4,9 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d483ce6d-440c-4168-a45c-3ac57b477076" name="Changes" comment="testing ci/cd pipeline">
+    <list default="true" id="d483ce6d-440c-4168-a45c-3ac57b477076" name="Changes" comment="preparing load tests">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/config/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/infrastructure/docker-compose.dev.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/infrastructure/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/infrastructure/docker-compose.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/KafkaConsumerService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/KafkaConsumerService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application-dev.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application-dev.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application-docker.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application-prod.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application-prod.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -181,23 +187,7 @@
       <recent name="org.example.kinesisflow.controller" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.kinesisflow in kinesisFlow">
-    <configuration name="AlertControllerIntegrationTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="kinesisFlow" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="org.example.kinesisflow.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="org.example.kinesisflow" />
-      <option name="MAIN_CLASS_NAME" value="org.example.kinesisflow.AlertControllerIntegrationTest" />
-      <option name="METHOD_NAME" value="" />
-      <option name="TEST_OBJECT" value="class" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
+  <component name="RunManager" selected="Spring Boot.KinesisFlowApplication">
     <configuration name="AlertNotificationIntegrationTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="kinesisFlow" />
       <extension name="coverage">
@@ -214,22 +204,6 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="AlertNotificationIntegrationTest.testConcurrentAlertProcessing" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="kinesisFlow" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="org.example.kinesisflow.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="org.example.kinesisflow" />
-      <option name="MAIN_CLASS_NAME" value="org.example.kinesisflow.AlertNotificationIntegrationTest" />
-      <option name="METHOD_NAME" value="testConcurrentAlertProcessing" />
-      <option name="TEST_OBJECT" value="method" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="kinesisflow in kinesisFlow" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="kinesisFlow" />
       <option name="MAIN_CLASS_NAME" value="" />
@@ -241,6 +215,7 @@
       </method>
     </configuration>
     <configuration name="KinesisFlowApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="ACTIVE_PROFILES" value="dev" />
       <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
       <module name="kinesisFlow" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="org.example.kinesisflow.KinesisFlowApplication" />
@@ -271,6 +246,14 @@
       </deployment>
       <method v="2" />
     </configuration>
+    <configuration name="infrastructure: Compose Deployment" type="docker-deploy" factoryName="docker-compose.yml" server-name="Docker">
+      <deployment type="docker-compose.yml">
+        <settings>
+          <option name="sourceFilePath" value="infrastructure/docker-compose.yml" />
+        </settings>
+      </deployment>
+      <method v="2" />
+    </configuration>
     <configuration name="infrastructure/docker-compose.dev.yml: Compose Deployment" type="docker-deploy" factoryName="docker-compose.yml" temporary="true" server-name="Docker">
       <deployment type="docker-compose.yml">
         <settings>
@@ -280,21 +263,18 @@
       <method v="2" />
     </configuration>
     <list>
+      <item itemvalue="Docker.infrastructure: Compose Deployment" />
       <item itemvalue="Docker.KinesisFlow Docker" />
       <item itemvalue="Docker.infrastructure/docker-compose.dev.yml: Compose Deployment" />
-      <item itemvalue="JUnit.AlertNotificationIntegrationTest.testConcurrentAlertProcessing" />
       <item itemvalue="JUnit.AlertNotificationIntegrationTest" />
-      <item itemvalue="JUnit.AlertControllerIntegrationTest" />
       <item itemvalue="JUnit.kinesisflow in kinesisFlow" />
       <item itemvalue="Spring Boot.KinesisFlowApplication" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="JUnit.kinesisflow in kinesisFlow" />
-        <item itemvalue="JUnit.AlertNotificationIntegrationTest.testConcurrentAlertProcessing" />
         <item itemvalue="JUnit.AlertNotificationIntegrationTest" />
         <item itemvalue="Docker.infrastructure/docker-compose.dev.yml: Compose Deployment" />
-        <item itemvalue="JUnit.AlertControllerIntegrationTest" />
       </list>
     </recent_temporary>
   </component>
@@ -370,7 +350,9 @@
       <workItem from="1753442708791" duration="2951000" />
       <workItem from="1753463317859" duration="1084000" />
       <workItem from="1753480698125" duration="23000" />
-      <workItem from="1753523100604" duration="493000" />
+      <workItem from="1753523100604" duration="829000" />
+      <workItem from="1753611788433" duration="4298000" />
+      <workItem from="1753696133511" duration="2921000" />
     </task>
     <task id="LOCAL-00001" summary="created docker compose for kafka + tested creating a topic">
       <option name="closed" value="true" />
@@ -756,7 +738,15 @@
       <option name="project" value="LOCAL" />
       <updated>1753444214796</updated>
     </task>
-    <option name="localTasksCounter" value="49" />
+    <task id="LOCAL-00049" summary="preparing load tests">
+      <option name="closed" value="true" />
+      <created>1753523887883</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1753523887883</updated>
+    </task>
+    <option name="localTasksCounter" value="50" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -786,7 +776,8 @@
     <MESSAGE value="project ready for deployment" />
     <MESSAGE value="first deployed version and testing ci pipeline" />
     <MESSAGE value="testing ci/cd pipeline" />
-    <option name="LAST_COMMIT_MESSAGE" value="testing ci/cd pipeline" />
+    <MESSAGE value="preparing load tests" />
+    <option name="LAST_COMMIT_MESSAGE" value="preparing load tests" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

@@ -1,5 +1,8 @@
 package org.example.kinesisflow.service;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import org.example.kinesisflow.mapper.EventToNotificationMapper;
 import org.example.kinesisflow.record.CryptoEvent;
 import org.example.kinesisflow.websocket.RedisMessagePublisher;
@@ -23,13 +26,25 @@ public class KafkaConsumerService {
     private final RedisStringService redisStringService;
     private final RedisSortedSetService redisSortedSetService;
     private final RedisMessagePublisher redisMessagePublisher;
+    private final Timer processingTimer;
+    private final Counter usersNotifiedCounter;
+
 
     public KafkaConsumerService(RedisStringService redisStringService,
-                                RedisSortedSetService redisSortedSetService, RedisMessagePublisher redisMessagePublisher
+                                RedisSortedSetService redisSortedSetService, RedisMessagePublisher redisMessagePublisher,
+                                MeterRegistry meterRegistry
     )  {
         this.redisStringService = redisStringService;
         this.redisSortedSetService = redisSortedSetService;
         this.redisMessagePublisher = redisMessagePublisher;
+        this.processingTimer = Timer.builder("kinesisflow.consumer.processing.duration")
+                .description("Time taken to process a single market event")
+                .publishPercentiles(0.95, 0.99)
+                .register(meterRegistry);
+
+        this.usersNotifiedCounter = Counter.builder("kinesisflow.notifications.sent.total")
+                .description("Total number of user notifications sent")
+                .register(meterRegistry);
     }
 
     @KafkaListener(
@@ -44,7 +59,10 @@ public class KafkaConsumerService {
         log.info("Message received: {}", cryptoEvent);
 
 
+        processingTimer.record(() -> {
+            log.info("Processing event: {}", cryptoEvent);
             processCryptoEvent(cryptoEvent);
+        });
 
     }
 
@@ -133,6 +151,8 @@ public class KafkaConsumerService {
         users.forEach(u -> redisMessagePublisher.publish("alerts", EventToNotificationMapper.mapToNotification(cryptoEvent, u)));
 
         log.info("Processing {} affected users for asset {}", users.size(), cryptoEvent.asset());
+
+        usersNotifiedCounter.increment(users.size());
     }
 
 
