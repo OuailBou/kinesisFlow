@@ -48,6 +48,7 @@ public class SecurityConfig {
                         .requestMatchers("/ingest").permitAll()
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/ws/notifications/**").permitAll()
+                        .requestMatchers("/actuator/**").permitAll()
 
 
                         // All other endpoints require authentication
