@@ -52,7 +52,7 @@ public class KafkaConsumerService {
             id = "kinesis-listener",
             topics = "raw-market-data",
             groupId = "kinesis-group",
-            concurrency = "1",
+            concurrency = "3",
             containerFactory = "kafkaListenerContainerFactory"
     )
 
