@@ -25,7 +25,7 @@ public class RedisSortedSetService {
     }
 
     public String createRuleIndexValue(User user, BigDecimal price) {
-        return String.join(":", user.getUsername(), price.toPlainString());
+        return String.join(":", user.getUsername(), price.stripTrailingZeros().toPlainString());
     }
 
     public void addElement(String key, String value, BigDecimal score) {
