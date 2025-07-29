@@ -432,13 +432,13 @@ class AlertControllerIntegrationTest {
 
             // Then
             String expectedKey = "SOL:1"; // GREATER_THAN = 1
-            String expectedValue = TEST_USERNAME + ":100.50";
+            String expectedValue = TEST_USERNAME + ":100.5";
 
             Set<String> elements = redisSortedSetService.getAllElements(expectedKey);
             assertThat(elements).contains(expectedValue);
 
             Double score = redisSortedSetService.getScore(expectedKey, expectedValue);
-            assertThat(score).isEqualTo(100.50);
+            assertThat(score).isEqualTo(100.5);
 
             // Verify range queries work
             Set<String> rangeResults = redisSortedSetService.getRangeByScore(
