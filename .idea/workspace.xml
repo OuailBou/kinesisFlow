@@ -6,7 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="d483ce6d-440c-4168-a45c-3ac57b477076" name="Changes" comment="fixing zeroes problem at deleting redis elements">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/org/example/kinesisflow/AlertControllerIntegrationTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/org/example/kinesisflow/AlertControllerIntegrationTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -374,15 +373,7 @@
       <workItem from="1753724902736" duration="12000" />
       <workItem from="1753733802335" duration="594000" />
       <workItem from="1753783262914" duration="5535000" />
-      <workItem from="1753789244540" duration="1169000" />
-    </task>
-    <task id="LOCAL-00007" summary="imeplemented tests for the new controllers">
-      <option name="closed" value="true" />
-      <created>1751648548889</created>
-      <option name="number" value="00007" />
-      <option name="presentableId" value="LOCAL-00007" />
-      <option name="project" value="LOCAL" />
-      <updated>1751648548889</updated>
+      <workItem from="1753789244540" duration="2801000" />
     </task>
     <task id="LOCAL-00008" summary="changed code for a M to M approach in the db, configures redis">
       <option name="closed" value="true" />
@@ -768,7 +759,15 @@
       <option name="project" value="LOCAL" />
       <updated>1753789859524</updated>
     </task>
-    <option name="localTasksCounter" value="56" />
+    <task id="LOCAL-00056" summary="fixing zeroes problem at deleting redis elements">
+      <option name="closed" value="true" />
+      <created>1753790428546</created>
+      <option name="number" value="00056" />
+      <option name="presentableId" value="LOCAL-00056" />
+      <option name="project" value="LOCAL" />
+      <updated>1753790428547</updated>
+    </task>
+    <option name="localTasksCounter" value="57" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

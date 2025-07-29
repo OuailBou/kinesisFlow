@@ -47,6 +47,7 @@ public class KafkaConsumerService {
                 .register(meterRegistry);
     }
 
+    @Transactional
     @KafkaListener(
             id = "kinesis-listener",
             topics = "raw-market-data",
