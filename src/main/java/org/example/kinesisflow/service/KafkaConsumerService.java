@@ -54,7 +54,7 @@ public class KafkaConsumerService {
             concurrency = "1",
             containerFactory = "kafkaListenerContainerFactory"
     )
-    @Transactional
+
     public void listen(CryptoEvent cryptoEvent) {
         log.info("Message received: {}", cryptoEvent);
 
