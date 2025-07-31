@@ -4,13 +4,6 @@
 
 KinesisFlow is a high-performance, event-driven platform designed to ingest real-time market data, process it against user-defined alerts, and deliver instant notifications. The system is built on a modern, cloud-native architecture, demonstrating principles of scalability, resilience, and observability.
 
----
-
-### 🎥 Live Demo
-
-[]
-
-*A brief video showcasing the system in action: creating an alert via the API, ingesting data with a load test, and receiving a real-time notification on a WebSocket client.*
 
 ---
 
