@@ -1,4 +1,5 @@
 package org.example.kinesisflow.controller;
+
 import jakarta.validation.Valid;
 import org.example.kinesisflow.dto.UserDTO;
 import org.example.kinesisflow.mapper.UserMapper;
@@ -8,18 +9,20 @@ import org.example.kinesisflow.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.net.URI;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+
 import java.util.HashMap;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
+@Tag(name = "Users", description = "Authentication and user registration endpoints")
 public class UserController {
 
     private final UserService userService;
@@ -32,7 +35,8 @@ public class UserController {
         this.authenticationManager = authenticationManager;
     }
 
-
+    @Operation(summary = "Register a new user", description = "Creates a new user in the system.")
+    @ApiResponse(responseCode = "201", description = "User created successfully")
     @PostMapping("/users")
     public ResponseEntity<Map<String, Object>> addNewUser(@RequestBody @Valid UserDTO userDTO) {
         User user = UserMapper.toEntity(userDTO);
@@ -45,7 +49,8 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-
+    @Operation(summary = "User login", description = "Authenticates the user and returns a JWT token.")
+    @ApiResponse(responseCode = "200", description = "Login successful")
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> authenticateAndGetToken(@RequestBody @Valid UserDTO userDTO) {
         Authentication authentication = authenticationManager.authenticate(
@@ -59,14 +64,15 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    // FOR HEALTH CHECKS
+    @Operation(summary = "Health check", description = "Simple endpoint to verify server is running.")
     @GetMapping("/h")
     public ResponseEntity<String> health() {
         return ResponseEntity.ok("OK");
     }
-    @GetMapping("/CHECK_V4")
+
+    @Operation(summary = "Test endpoint", description = "Basic test endpoint for deployment/CD pipeline.")
+    @GetMapping("/CHECK_V5")
     public ResponseEntity<String> testCD() {
         return ResponseEntity.ok("OK");
     }
-
 }

@@ -4,19 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d483ce6d-440c-4168-a45c-3ac57b477076" name="Changes" comment="testing load with concurrency changes">
-      <change afterPath="$PROJECT_DIR$/infrastructure/docker-compose.dev.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/application-docker.properties" afterDir="false" />
+    <list default="true" id="d483ce6d-440c-4168-a45c-3ac57b477076" name="Changes" comment="fixing AlertNotificationIntegrationTest">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/infrastructure/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/infrastructure/docker-compose.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/config/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/controller/AlertController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/controller/AlertController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/controller/IngestController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/controller/IngestController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/controller/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/controller/UserController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/DlqListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/DlqListener.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/KafkaConsumerService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/KafkaConsumerService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/RedisStringService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/service/RedisStringService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/websocket/RedisMessageSubscriber.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/kinesisflow/websocket/RedisMessageSubscriber.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application-test.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application-test.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/org/example/kinesisflow/AlertNotificationIntegrationTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/org/example/kinesisflow/AlertNotificationIntegrationTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/org/example/kinesisflow/CustomWebSocketClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/org/example/kinesisflow/CustomWebSocketClient.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -193,7 +187,7 @@
       <recent name="org.example.kinesisflow.controller" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.kinesisflow in kinesisFlow">
+  <component name="RunManager" selected="Spring Boot.KinesisFlowApplication">
     <configuration name="AlertNotificationIntegrationTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="kinesisFlow" />
       <extension name="coverage">
@@ -312,10 +306,10 @@
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Docker.infrastructure/docker-compose.dev.yml: Compose Deployment" />
         <item itemvalue="JUnit.kinesisflow in kinesisFlow" />
         <item itemvalue="JUnit.AlertNotificationIntegrationTest" />
         <item itemvalue="JUnit.AlertNotificationIntegrationTest.testConcurrentAlertProcessing" />
-        <item itemvalue="Docker.infrastructure/docker-compose.dev.yml: Compose Deployment" />
         <item itemvalue="JUnit.AlertNotificationIntegrationTest.testNoNotificationWhenCriteriaNotMet" />
       </list>
     </recent_temporary>
@@ -409,15 +403,7 @@
       <workItem from="1753883501985" duration="408000" />
       <workItem from="1753953978394" duration="4455000" />
       <workItem from="1753958531089" duration="3631000" />
-      <workItem from="1753962366629" duration="608000" />
-    </task>
-    <task id="LOCAL-00010" summary="completed the testing of the alert controller and the interaction with redis">
-      <option name="closed" value="true" />
-      <created>1751981295642</created>
-      <option name="number" value="00010" />
-      <option name="presentableId" value="LOCAL-00010" />
-      <option name="project" value="LOCAL" />
-      <updated>1751981295642</updated>
+      <workItem from="1753962366629" duration="2255000" />
     </task>
     <task id="LOCAL-00011" summary="changed the keys and values format, and added users suscription in redis">
       <option name="closed" value="true" />
@@ -803,14 +789,21 @@
       <option name="project" value="LOCAL" />
       <updated>1753798068517</updated>
     </task>
-    <option name="localTasksCounter" value="59" />
+    <task id="LOCAL-00059" summary="fixing AlertNotificationIntegrationTest">
+      <option name="closed" value="true" />
+      <created>1753963012993</created>
+      <option name="number" value="00059" />
+      <option name="presentableId" value="LOCAL-00059" />
+      <option name="project" value="LOCAL" />
+      <updated>1753963012994</updated>
+    </task>
+    <option name="localTasksCounter" value="60" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="imeplemented tests for the new controllers" />
     <MESSAGE value="changed code for a M to M approach in the db, configures redis" />
     <MESSAGE value="added domain event pattern and integration tests for the alert controller" />
     <MESSAGE value="completed the testing of the alert controller and the interaction with redis" />
@@ -835,7 +828,8 @@
     <MESSAGE value="added cleanup function for performance testing" />
     <MESSAGE value="fixing zeroes problem at deleting redis elements" />
     <MESSAGE value="testing load with concurrency changes" />
-    <option name="LAST_COMMIT_MESSAGE" value="testing load with concurrency changes" />
+    <MESSAGE value="fixing AlertNotificationIntegrationTest" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixing AlertNotificationIntegrationTest" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
