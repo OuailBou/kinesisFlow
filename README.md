@@ -61,7 +61,7 @@ Extensive load testing was performed using **k6** to validate the system's perfo
 *Real-time performance dashboard in Grafana during a load test with 2 active instances.*
 
 **Conclusions:**
-*   **High Efficiency:** A single instance demonstrated a very high processing throughput with sub-10ms internal latency.
+*   **High Efficiency:** Even with one instance, the system handled a high volume of events with internal latency under 10ms.
 *   **Proven Horizontal Scalability:** Doubling the compute resources resulted in a **2.38x increase in processing capacity**(with double the load), proving the effectiveness of the stateless, event-driven architecture.
 
 ---
