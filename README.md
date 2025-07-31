@@ -78,15 +78,13 @@ Extensive load testing was performed using **k6** to validate the system's perfo
 
 The full REST API documentation is generated via OpenAPI 3 and is accessible through a live Swagger UI.
 
-*   **Live Swagger UI:** ``
+*   **Live Swagger UI:** `http://localhost:8080/swagger-ui/index.html#/`
 
 ---
 
 ### ⚙️ Running Locally
 
 **Prerequisites:**
-*   Java 17+
-*   Maven 3.8+
 *   Docker & Docker Compose
 
 **Steps:**
