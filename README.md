@@ -4,7 +4,6 @@
 
 KinesisFlow is a high-performance, event-driven platform designed to ingest real-time market data, process it against user-defined alerts, and deliver instant notifications. The system is built on a modern, cloud-native architecture, demonstrating principles of scalability, resilience, and observability.
 
-
 ---
 
 ### 🏛️ Architecture Overview
@@ -12,7 +11,6 @@ KinesisFlow is a high-performance, event-driven platform designed to ingest real
 The system is designed as a modular, event-driven monolith, ready to be evolved into a full microservices architecture. It separates the **write-intensive path** (alert management) from the **read-intensive, real-time path** (event processing).
 
 ![KinesisFlow AWS Architecture Diagram](https://github.com/user-attachments/assets/dad66fdd-cbb5-4e0c-bbf9-5e43f448249c)
-
 
 #### Real-Time Alerting Pipeline (The "Hot Path")
 1.  The **Ingest Service** receives market data via a load-balanced REST API endpoint.
@@ -54,15 +52,47 @@ Extensive load testing was performed using **k6** to validate the system's perfo
 | Metric                     | Result (1 Fargate Instance) | Result (2 Fargate Instances) | Change     |
 | -------------------------- | --------------------------- | ---------------------------- | ---------- |
 | **Max Consumer Throughput**| ~222 events/sec             | **~530 events/sec**          | **+138%**  |
-| **API Latency (p95)**        | ~95 ms                    | **~81 ms**                   | **-15%**   |
+| **API Latency (p95)**      | ~95 ms                      | **~81 ms**                   | **-15%**   |
 | **API Error Rate**         | 0.01%                       | **0.01%**                    | Negligible |
 
-![Grafana Dashboard Screenshot](https://github.com/user-attachments/assets/a3454d94-8672-4c66-9765-e64468d82f34)
+![Grafana Dashboard Screenshot](https://github.com/user-attachments/assets/a3454d94-8672-4c66-9765-e64468d82f34)  
 *Real-time performance dashboard in Grafana during a load test with 2 active instances.*
 
 **Conclusions:**
 *   **High Efficiency:** Even with one instance, the system handled a high volume of events with internal latency under 10ms.
-*   **Proven Horizontal Scalability:** Doubling the compute resources resulted in a **2.38x increase in processing capacity**(with double the load), proving the effectiveness of the stateless, event-driven architecture.
+*   **Proven Horizontal Scalability:** Doubling the compute resources resulted in a **2.38x increase in processing capacity** (with double the load), proving the effectiveness of the stateless, event-driven architecture.
+
+---
+
+### 🧪 Code Quality & Testing Strategy
+
+This project emphasizes a high standard of code quality and reliability, validated through a comprehensive testing strategy. The goal is not just to write code that works, but to write code that is robust, maintainable, and well-understood.
+
+#### ✅ Test Coverage Report (JaCoCo)
+
+![Test Coverage Report](https://github.com/user-attachments/assets/2c50159b-565a-4961-bdaa-993c88029d90)
+
+
+| Metric            | Overall Coverage | Key Takeaways & Improvement Areas                                                                 |
+|-------------------|------------------|----------------------------------------------------------------------------------------------------|
+| **Line Coverage**   | 83%              | Demonstrates a strong foundation of testing across all major components, meeting industry standards. |
+| **Branch Coverage** | 56%              | Key focus for future improvement. Current suite covers the "happy path" well; aim to increase edge-case coverage. |
+
+#### 🧠 Testing Philosophy
+
+- **Unit & Integration Tests**:  
+  Includes fast unit tests (using **Mockito**) for business logic and full integration tests (using **Testcontainers**) to validate flows through **Kafka**, **Redis**, and **PostgreSQL**.
+
+- **Continuous Integration**:  
+  Every push to a pull request triggers a **GitHub Actions** workflow running the entire test suite, ensuring no regressions enter the main branch.
+
+- **Static Analysis**:  
+  The codebase is continuously monitored with **SonarQube** for code smells, bugs, and security vulnerabilities, enforcing high-quality standards.
+
+#### 🔧 Next Steps for Improvement
+
+- Increase **branch coverage** in the **service** and **websocket** layers by testing failure scenarios.
+- Add dedicated **unit tests** for model entities to ensure their internal business logic is verified.
 
 ---
 
@@ -89,4 +119,5 @@ The full REST API documentation is generated via OpenAPI 3 and is accessible thr
     ```bash
     docker-compose up -d
     ```
+
 The application will be available at `http://localhost:8080`.
