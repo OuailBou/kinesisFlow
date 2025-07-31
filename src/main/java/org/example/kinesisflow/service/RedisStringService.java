@@ -20,4 +20,11 @@ public class RedisStringService {
     public Double get(String key) {
         return redisTemplateDouble.opsForValue().get(key);
     }
+    public void deleteAll() {
+        var keys = redisTemplateDouble.keys("*");
+        if (keys != null && !keys.isEmpty()) {
+            redisTemplateDouble.delete(keys);
+        }
+    }
+
 }

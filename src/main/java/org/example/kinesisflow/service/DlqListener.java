@@ -1,4 +1,4 @@
-package org.example.kinesisflow.listener;
+package org.example.kinesisflow.service;
 
 import lombok.Data;
 import org.apache.kafka.clients.consumer.ConsumerRecord;

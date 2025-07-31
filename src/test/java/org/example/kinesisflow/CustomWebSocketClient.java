@@ -1,12 +1,16 @@
 package org.example.kinesisflow;
 
 import org.java_websocket.client.WebSocketClient;
-import org.java_websocket.handshake.ServerHandshake;
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
+import org.java_websocket.handshake.ServerHandshake;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 
 public class CustomWebSocketClient extends WebSocketClient {
+
+    private static final Logger log = LoggerFactory.getLogger(CustomWebSocketClient.class);
 
     public CustomWebSocketClient(URI serverUri) {
         super(serverUri);
@@ -14,27 +18,27 @@ public class CustomWebSocketClient extends WebSocketClient {
 
     @Override
     public void onOpen(ServerHandshake handshakedata) {
-        System.out.println("Connected to server");
+        log.info("Connected to server");
         try {
             send("Hello WebSocket Server");
         } catch (WebsocketNotConnectedException e) {
-            System.err.println("Cannot send message, not connected.");
+            log.warn("Cannot send message, not connected.", e);
         }
     }
 
     @Override
     public void onMessage(String message) {
-        System.out.println("Received message: " + message);
+        log.info("Received message: {}", message);
         close();
     }
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
-        System.out.println("Connection closed: " + reason);
+        log.info("Connection closed: {} (code: {}, remote: {})", reason, code, remote);
     }
 
     @Override
     public void onError(Exception ex) {
-        System.err.println("Error: " + ex.getMessage());
+        log.error("WebSocket error occurred", ex);
     }
 }

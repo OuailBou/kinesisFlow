@@ -3,8 +3,8 @@ package org.example.kinesisflow;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.kinesisflow.dto.AlertDTO;
 import org.example.kinesisflow.dto.UserDTO;
-import org.example.kinesisflow.listener.DlqListener;
 import org.example.kinesisflow.record.CryptoEvent;
+import org.example.kinesisflow.service.DlqListener;
 import org.example.kinesisflow.service.RedisSortedSetService;
 import org.example.kinesisflow.service.RedisStringService;
 import org.example.kinesisflow.websocket.NotifierWebSocketHandler;
@@ -12,18 +12,19 @@ import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.management.ThreadDumpEndpoint;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.java_websocket.handshake.ServerHandshake;
-import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -35,6 +36,7 @@ import java.net.URI;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -47,21 +49,24 @@ import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @AutoConfigureMockMvc
 @Testcontainers
-@Transactional
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class AlertNotificationIntegrationTest {
 
     private static final Logger log = LoggerFactory.getLogger(AlertNotificationIntegrationTest.class);
 
     @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
+    static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
 
     @Container
-    static GenericContainer<?> redis = new GenericContainer<>("redis:7-alpine")
+    static final GenericContainer<?> redis = new GenericContainer<>("redis:7-alpine")
             .withExposedPorts(6379);
 
     @Container
     static final ConfluentKafkaContainer kafka = new ConfluentKafkaContainer("confluentinc/cp-kafka:7.4.0");
+
+    @Autowired
+    private ThreadDumpEndpoint threadDumpEndpoint;
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
@@ -111,25 +116,56 @@ class AlertNotificationIntegrationTest {
 
     private String jwtToken;
     private CustomWebSocketClient webSocketClient;
-    private BlockingQueue<String> receivedMessages;
-    private CountDownLatch messageLatch;
+    private final BlockingQueue<String> receivedMessages = new LinkedBlockingQueue<>();
+    private final AtomicInteger messageCount = new AtomicInteger(0);
 
     @BeforeEach
     void setUp() throws Exception {
+        // Close any existing WebSocket connection
+        if (webSocketClient != null && !webSocketClient.isClosed()) {
+            try {
+                webSocketClient.closeBlocking();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+
+        // Reset all components to clean state
+        reset(webSocketHandler, redisStringService);
         redisSortedSetService.deleteAll();
+        receivedMessages.clear();
+        messageCount.set(0);
+
+        if (dlqListener != null) {
+            dlqListener.clearMessages();
+        }
+
+        // Setup authenticated user and WebSocket connection
         createTestUser();
         jwtToken = authenticateAndGetToken();
-        receivedMessages = new LinkedBlockingQueue<>();
         setupWebSocketConnection();
     }
 
     @AfterEach
     void tearDown() throws Exception {
+        // Clean WebSocket connection
         if (webSocketClient != null && !webSocketClient.isClosed()) {
-            webSocketClient.close();
+            try {
+                webSocketClient.closeBlocking();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
-        receivedMessages.clear();
 
+        // Clean all state for next test
+        redisSortedSetService.deleteAll();
+        receivedMessages.clear();
+        messageCount.set(0);
+        reset(webSocketHandler, redisStringService);
+
+        if (dlqListener != null) {
+            dlqListener.clearMessages();
+        }
     }
 
     private void createTestUser() throws Exception {
@@ -171,9 +207,6 @@ class AlertNotificationIntegrationTest {
     }
 
     private void setupWebSocketConnection() throws Exception {
-        receivedMessages = new LinkedBlockingQueue<>();
-        messageLatch = new CountDownLatch(1);
-
         webSocketClient = new CustomWebSocketClient(new URI("ws://localhost:8081/ws/notifications?token=" + jwtToken)) {
             @Override
             public void onOpen(ServerHandshake handshake) {
@@ -184,18 +217,18 @@ class AlertNotificationIntegrationTest {
             public void onMessage(String message) {
                 log.info("WebSocket received message: {}", message);
                 receivedMessages.offer(message);
-                messageLatch.countDown();
+                int count = messageCount.incrementAndGet();
+                log.info("Message count now: {}", count);
             }
 
             @Override
             public void onClose(int code, String reason, boolean remote) {
-                log.info("WebSocket connection closed: {}", reason);
+                log.info("WebSocket connection closed: {} (code: {})", reason, code);
             }
 
             @Override
             public void onError(Exception ex) {
                 log.error("WebSocket error: {}", ex.getMessage(), ex);
-                messageLatch.countDown();
             }
         };
 
@@ -203,10 +236,17 @@ class AlertNotificationIntegrationTest {
         if (!connected) {
             throw new RuntimeException("Failed to connect to WebSocket");
         }
+
+        await().atMost(3, TimeUnit.SECONDS)
+                .pollInterval(100, TimeUnit.MILLISECONDS)
+                .until(() -> webSocketClient.isOpen());
+
+        log.info("WebSocket connection established and ready");
     }
 
     private void sendCryptoEvent(String asset, BigDecimal price) throws Exception {
         CryptoEvent event = new CryptoEvent(asset, price, Instant.now().toEpochMilli());
+        log.info("Sending crypto event: {} at price {}", asset, price);
         mockMvc.perform(post(INGEST_ENDPOINT)
                         .header("Authorization", "Bearer " + jwtToken)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -214,15 +254,10 @@ class AlertNotificationIntegrationTest {
                 .andExpect(status().isOk());
     }
 
-    private void waitForMessage(int timeoutSeconds) throws InterruptedException {
-        messageLatch = new CountDownLatch(1);
-        boolean messageReceived = messageLatch.await(timeoutSeconds, TimeUnit.SECONDS);
-        assertTrue(messageReceived, "Should have received a notification message within " + timeoutSeconds + " seconds");
-    }
-
-    private void waitForNoMessage(int timeoutSeconds) throws InterruptedException {
-        String message = receivedMessages.poll(timeoutSeconds, TimeUnit.SECONDS);
-        assertNull(message, "Should not have received any notification message");
+    private void waitForMessages(int expectedCount, int timeoutSeconds) {
+        await().atMost(timeoutSeconds, TimeUnit.SECONDS)
+                .pollInterval(200, TimeUnit.MILLISECONDS)
+                .until(() -> messageCount.get() >= expectedCount);
     }
 
     @Test
@@ -239,15 +274,15 @@ class AlertNotificationIntegrationTest {
                 .andExpect(jsonPath("$.message").value("Alert created"))
                 .andExpect(jsonPath("$.username").value(TEST_USERNAME));
 
+        // Verify alert is stored in Redis
         String gtKey = redisSortedSetService.createRuleIndexKey(TEST_ASSET, "1");
-        Set<String> storedAlerts = redisSortedSetService.getAllElements(gtKey);
-        assertFalse(storedAlerts.isEmpty(), "Alert should be stored in Redis");
+        await().atMost(5, TimeUnit.SECONDS).until(() -> !redisSortedSetService.getAllElements(gtKey).isEmpty());
 
+        // Send price below threshold (no trigger), then above threshold (should trigger)
         sendCryptoEvent(TEST_ASSET, new BigDecimal("49000"));
-        Thread.sleep(2000);
-
         sendCryptoEvent(TEST_ASSET, new BigDecimal("51000"));
-        waitForMessage(10);
+
+        waitForMessages(1, 10);
 
         verify(webSocketHandler, timeout(5000).atLeastOnce())
                 .sendMessageToUser(eq(TEST_USERNAME), anyString());
@@ -265,11 +300,11 @@ class AlertNotificationIntegrationTest {
                         .content(objectMapper.writeValueAsString(alertDTO)))
                 .andExpect(status().isCreated());
 
+        // Send price above threshold first, then below (should trigger on decrease)
         sendCryptoEvent(TEST_ASSET, new BigDecimal("52000"));
-        Thread.sleep(2000);
-
         sendCryptoEvent(TEST_ASSET, new BigDecimal("49000"));
-        waitForMessage(10);
+
+        waitForMessages(1, 10);
 
         verify(webSocketHandler, timeout(5000).atLeastOnce())
                 .sendMessageToUser(eq(TEST_USERNAME), anyString());
@@ -294,19 +329,16 @@ class AlertNotificationIntegrationTest {
                         .content(objectMapper.writeValueAsString(ethAlert)))
                 .andExpect(status().isCreated());
 
+        // Send prices below thresholds first, then above both thresholds
         sendCryptoEvent("BTC", new BigDecimal("49000"));
         sendCryptoEvent("ETH", new BigDecimal("2900"));
-        Thread.sleep(2000);
-
         sendCryptoEvent("BTC", new BigDecimal("51000"));
         sendCryptoEvent("ETH", new BigDecimal("3100"));
 
-        waitForMessage(10);
-        Thread.sleep(3000);
-        int totalMessages = receivedMessages.size() + 1;
-        assertTrue(totalMessages >= 2, "Should have received at least 2 notifications, got: " + totalMessages);
+        waitForMessages(2, 15);
 
-        verify(webSocketHandler, timeout(5000).atLeast(2))
+        assertEquals(2, messageCount.get(), "Should have received exactly 2 notifications");
+        verify(webSocketHandler, timeout(10000).times(2))
                 .sendMessageToUser(eq(TEST_USERNAME), anyString());
     }
 
@@ -314,6 +346,8 @@ class AlertNotificationIntegrationTest {
     @Order(4)
     @DisplayName("No notification when price criteria not met")
     void testNoNotificationWhenCriteriaNotMet() throws Exception {
+        assertEquals(0, messageCount.get(), "Should start with zero messages");
+
         AlertDTO alertDTO = createAlertDTO(TEST_ASSET, TEST_PRICE, GREATER_THAN);
 
         mockMvc.perform(post(SUBSCRIBE_ENDPOINT)
@@ -322,13 +356,22 @@ class AlertNotificationIntegrationTest {
                         .content(objectMapper.writeValueAsString(alertDTO)))
                 .andExpect(status().isCreated());
 
-        sendCryptoEvent(TEST_ASSET, new BigDecimal("49000"));
-        Thread.sleep(2000);
-        sendCryptoEvent(TEST_ASSET, new BigDecimal("49500"));
-        Thread.sleep(3000);
+        // Verify alert is stored before testing
+        String gtKey = redisSortedSetService.createRuleIndexKey(TEST_ASSET, "1");
+        await().atMost(5, TimeUnit.SECONDS)
+                .until(() -> !redisSortedSetService.getAllElements(gtKey).isEmpty());
 
-        waitForNoMessage(3);
+        // Send prices that don't meet criteria (both below 50000)
+        sendCryptoEvent(TEST_ASSET, new BigDecimal("49000"));
+        sendCryptoEvent(TEST_ASSET, new BigDecimal("49500"));
+
+        // Wait for processing to complete
+        Thread.sleep(2000);
+
+        assertEquals(0, messageCount.get(), "Should not have received any messages");
         verify(webSocketHandler, never()).sendMessageToUser(eq(TEST_USERNAME), anyString());
+
+        log.info("Test completed - Final message count: {}", messageCount.get());
     }
 
     @Test
@@ -337,6 +380,7 @@ class AlertNotificationIntegrationTest {
     void testUnsubscribeStopsNotifications() throws Exception {
         AlertDTO alertDTO = createAlertDTO(TEST_ASSET, TEST_PRICE, GREATER_THAN);
 
+        // Subscribe then immediately unsubscribe
         mockMvc.perform(post(SUBSCRIBE_ENDPOINT)
                         .header("Authorization", "Bearer " + jwtToken)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -350,12 +394,13 @@ class AlertNotificationIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("You have unsubscribed from alert succesfully"));
 
+        // Send events that would normally trigger alerts
         sendCryptoEvent(TEST_ASSET, new BigDecimal("49000"));
-        Thread.sleep(2000);
         sendCryptoEvent(TEST_ASSET, new BigDecimal("51000"));
-        Thread.sleep(3000);
 
-        waitForNoMessage(3);
+        Thread.sleep(2000);
+
+        assertEquals(0, messageCount.get(), "Should not have received any messages after unsubscribe");
         verify(webSocketHandler, never()).sendMessageToUser(eq(TEST_USERNAME), anyString());
     }
 
@@ -363,6 +408,7 @@ class AlertNotificationIntegrationTest {
     @Order(6)
     @DisplayName("Processing failure routes message to DLQ")
     void testProcessingFailureRoutesToDlq() {
+        // Simulate Redis failure to trigger DLQ routing
         doThrow(new RuntimeException("Simulated Redis failure"))
                 .when(redisStringService).get(anyString());
 
@@ -373,8 +419,9 @@ class AlertNotificationIntegrationTest {
             kafkaTemplate.send("raw-market-data", validEvent.asset(), validEvent);
 
             await().atMost(15, TimeUnit.SECONDS)
+                    .pollInterval(500, TimeUnit.MILLISECONDS)
                     .untilAsserted(() -> {
-                        assertEquals(1, dlqListener.getDlqRecords().size());
+                        assertEquals(1, dlqListener.getDlqRecords().size(), "Message should be in DLQ");
                     });
         } finally {
             reset(redisStringService);
@@ -391,7 +438,7 @@ class AlertNotificationIntegrationTest {
         kafkaTemplate.send("raw-market-data", validEvent.asset(), validEvent);
 
         await().atMost(10, TimeUnit.SECONDS)
-                .pollInterval(1, TimeUnit.SECONDS)
+                .pollInterval(500, TimeUnit.MILLISECONDS)
                 .untilAsserted(() -> {
                     assertTrue(dlqListener.getDlqRecords().isEmpty(), "DLQ should be empty since processing succeeded");
                 });
@@ -415,16 +462,22 @@ class AlertNotificationIntegrationTest {
                     .andExpect(status().isCreated());
         }
 
+        // Wait for all alerts to be stored in Redis
+        await().atMost(5, TimeUnit.SECONDS)
+                .pollInterval(200, TimeUnit.MILLISECONDS)
+                .until(() -> {
+                    String gtKey = redisSortedSetService.createRuleIndexKey(TEST_ASSET, "1");
+                    return redisSortedSetService.getAllElements(gtKey).size() >= 3;
+                });
+
+        // Send price below all thresholds, then above all thresholds
         sendCryptoEvent(TEST_ASSET, new BigDecimal("48000"));
-        Thread.sleep(2000);
         sendCryptoEvent(TEST_ASSET, new BigDecimal("52000"));
 
-        waitForMessage(10);
-        Thread.sleep(5000);
-        int totalMessages = receivedMessages.size() + 1;
-        assertTrue(totalMessages >= 3, "Should have received at least 3 notifications for concurrent alerts, got: " + totalMessages);
+        waitForMessages(1, 15);
 
-        verify(webSocketHandler, timeout(10000).atLeast(3))
+        assertEquals(1, messageCount.get(), "Should have received exactly 1 notification for concurrent alerts");
+        verify(webSocketHandler, timeout(15000).times(1))
                 .sendMessageToUser(eq(TEST_USERNAME), anyString());
     }
 
@@ -440,20 +493,20 @@ class AlertNotificationIntegrationTest {
                         .content(objectMapper.writeValueAsString(alertDTO)))
                 .andExpect(status().isCreated());
 
+        // Test EQUAL comparison (should not trigger notifications)
         sendCryptoEvent(TEST_ASSET, new BigDecimal("49000"));
-        Thread.sleep(2000);
         sendCryptoEvent(TEST_ASSET, TEST_PRICE);
-        Thread.sleep(3000);
 
-        String message = receivedMessages.poll(2, TimeUnit.SECONDS);
-        assertNull(message, "EQUAL comparison should not trigger notifications");
+        Thread.sleep(2000);
+
+        assertEquals(0, messageCount.get(), "EQUAL comparison should not trigger notifications");
     }
 
     @Test
     @Order(10)
     @DisplayName("Direct WebSocket connection and message handling")
     void testDirectWebSocketConnection() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
+        final CountDownLatch latch = new CountDownLatch(1);
         final String[] receivedMsg = new String[1];
 
         CustomWebSocketClient client = new CustomWebSocketClient(new URI("ws://localhost:8081/ws/notifications?token=" + jwtToken)) {
@@ -481,24 +534,26 @@ class AlertNotificationIntegrationTest {
             }
         };
 
-        client.connectBlocking(10, TimeUnit.SECONDS);
+        assertTrue(client.connectBlocking(10, TimeUnit.SECONDS), "Should connect to WebSocket");
 
-        AlertDTO alertDTO = createAlertDTO(TEST_ASSET, TEST_PRICE, GREATER_THAN);
-        mockMvc.perform(post(SUBSCRIBE_ENDPOINT)
-                        .header("Authorization", "Bearer " + jwtToken)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(alertDTO)))
-                .andExpect(status().isCreated());
+        try {
+            AlertDTO alertDTO = createAlertDTO(TEST_ASSET, TEST_PRICE, GREATER_THAN);
+            mockMvc.perform(post(SUBSCRIBE_ENDPOINT)
+                            .header("Authorization", "Bearer " + jwtToken)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(alertDTO)))
+                    .andExpect(status().isCreated());
 
-        sendCryptoEvent(TEST_ASSET, new BigDecimal("49000"));
-        Thread.sleep(2000);
-        sendCryptoEvent(TEST_ASSET, new BigDecimal("51000"));
+            // Test direct WebSocket message delivery
+            sendCryptoEvent(TEST_ASSET, new BigDecimal("49000"));
+            sendCryptoEvent(TEST_ASSET, new BigDecimal("51000"));
 
-        boolean messageReceived = latch.await(10, TimeUnit.SECONDS);
-        client.close();
-
-        assertTrue(messageReceived, "Should have received a message via WebSocket");
-        assertNotNull(receivedMsg[0], "Received message should not be null");
-        assertTrue(receivedMsg[0].contains(TEST_ASSET), "Message should contain asset name");
+            boolean messageReceived = latch.await(10, TimeUnit.SECONDS);
+            assertTrue(messageReceived, "Should have received a message via WebSocket");
+            assertNotNull(receivedMsg[0], "Received message should not be null");
+            assertTrue(receivedMsg[0].contains(TEST_ASSET), "Message should contain asset name");
+        } finally {
+            client.closeBlocking();
+        }
     }
 }

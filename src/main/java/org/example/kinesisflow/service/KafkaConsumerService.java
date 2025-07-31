@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class KafkaConsumerService {
@@ -75,7 +76,7 @@ public class KafkaConsumerService {
             return;
         }
 
-        List<String> affectedUsers = getAffectedUsers(cryptoEvent, formerPrice.get());
+        Set<String> affectedUsers = getAffectedUsers(cryptoEvent, formerPrice.get());
 
         if (!affectedUsers.isEmpty()) {
             log.info("Found {} affected users for asset {} price change from {} to {}",
@@ -97,13 +98,13 @@ public class KafkaConsumerService {
         log.debug("Saved initial price for asset: {}", cryptoEvent.asset());
     }
 
-    private List<String> getAffectedUsers(CryptoEvent cryptoEvent, BigDecimal formerPrice) {
+    private Set<String> getAffectedUsers(CryptoEvent cryptoEvent, BigDecimal formerPrice) {
         PriceComparison comparison = comparePrices(cryptoEvent.price(), formerPrice);
 
         return switch (comparison) {
             case HIGHER -> getUsersForPriceIncrease(cryptoEvent.asset(), formerPrice, cryptoEvent.price());
             case LOWER -> getUsersForPriceDecrease(cryptoEvent.asset(), cryptoEvent.price(), formerPrice);
-            case EQUAL -> Collections.emptyList();
+            case EQUAL -> Collections.emptySet();
         };
     }
 
@@ -114,7 +115,7 @@ public class KafkaConsumerService {
         return PriceComparison.EQUAL;
     }
 
-    private List<String> getUsersForPriceIncrease(String asset, BigDecimal formerPrice, BigDecimal currentPrice) {
+    private Set<String> getUsersForPriceIncrease(String asset, BigDecimal formerPrice, BigDecimal currentPrice) {
         String gtKey = redisSortedSetService.createRuleIndexKey(asset, "1");
         Set<String> values = redisSortedSetService.getRangeByScore(
                 gtKey, formerPrice, currentPrice, true, false
@@ -122,7 +123,7 @@ public class KafkaConsumerService {
         return extractUserIds(values);
     }
 
-    private List<String> getUsersForPriceDecrease(String asset, BigDecimal currentPrice, BigDecimal formerPrice) {
+    private Set<String> getUsersForPriceDecrease(String asset, BigDecimal currentPrice, BigDecimal formerPrice) {
         String ltKey = redisSortedSetService.createRuleIndexKey(asset, "-1");
         Set<String> values = redisSortedSetService.getRangeByScore(
                 ltKey, currentPrice, formerPrice, true, false
@@ -130,13 +131,14 @@ public class KafkaConsumerService {
         return extractUserIds(values);
     }
 
-    private List<String> extractUserIds(Set<String> values) {
+    private Set<String> extractUserIds(Set<String> values) {
         return values.stream()
                 .map(this::extractUserId)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .toList();
+                .collect(Collectors.toSet());
     }
+
 
     private Optional<String> extractUserId(String value) {
         if (value == null || !value.contains(":")) {
@@ -146,8 +148,7 @@ public class KafkaConsumerService {
         return Optional.of(value.split(":")[0]);
     }
 
-    private void processAffectedUsers(List<String> users, CryptoEvent cryptoEvent) {
-        log.info("Processing {} affected user", users.getFirst());
+    private void processAffectedUsers(Set<String> users, CryptoEvent cryptoEvent) {
 
         users.forEach(u -> redisMessagePublisher.publish("alerts", EventToNotificationMapper.mapToNotification(cryptoEvent, u)));
 

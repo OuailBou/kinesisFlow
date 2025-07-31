@@ -31,7 +31,7 @@ public class RedisMessageSubscriber implements MessageListener {
             Notification obj = objectMapper.readValue(json, Notification.class);
             log.info("Message from Pub/Sub received for the user: {}", obj.user());
             notifierWebSocketHandler.sendMessageToUser(obj.user(), json);
-            System.out.println("Notification: " + obj.asset() + " " + obj.price());
+            log.info("Notification sent -> Asset: {}, Price: {}", obj.asset(), obj.price());
 
 
 
