@@ -537,7 +537,7 @@ class AlertControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(alertDTO)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("You have unsubscribed from alert succesfully"))
+                .andExpect(jsonPath("$.message").value("You have unsubscribed from alert successfully"))
                 .andExpect(jsonPath("$.username").value(TEST_USERNAME))
                 .andExpect(jsonPath("$.alert.asset").value(alertDTO.getAsset()));
     }

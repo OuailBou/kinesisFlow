@@ -1,6 +1,5 @@
 package org.example.kinesisflow.listener;
 
-import jakarta.persistence.OptimisticLockException;
 import org.example.kinesisflow.event.UserSubscribedToAlertEvent;
 import org.example.kinesisflow.event.UserUnsubscribedFromAlertEvent;
 import org.example.kinesisflow.model.Alert;
@@ -8,7 +7,7 @@ import org.example.kinesisflow.model.User;
 import org.example.kinesisflow.service.RedisSortedSetService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Profile;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.event.EventListener;
 import org.springframework.dao.DataAccessException;
 import org.springframework.retry.annotation.Backoff;
@@ -19,12 +18,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
-@Profile("!test")
 @Component
 public class AlertDomainEventListener {
 
     private static final Logger logger = LoggerFactory.getLogger(AlertDomainEventListener.class);
-
     private final RedisSortedSetService redisSortedSetService;
 
     public AlertDomainEventListener(RedisSortedSetService redisSortedSetService) {
@@ -33,8 +30,21 @@ public class AlertDomainEventListener {
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @ConditionalOnProperty(name = "spring.profiles.active", havingValue = "test", matchIfMissing = true)
     @Retryable(retryFor = DataAccessException.class, maxAttempts = 4, backoff = @Backoff(delay = 1000, multiplier = 2))
-    public void handleUserSubscribed(UserSubscribedToAlertEvent event) {
+    public void handleUserSubscribedTransactional(UserSubscribedToAlertEvent event) {
+        handleUserSubscribedInternal(event);
+    }
+
+    @Async
+    @EventListener
+    @ConditionalOnProperty(name = "spring.profiles.active", havingValue = "test")
+    @Retryable(retryFor = DataAccessException.class, maxAttempts = 4, backoff = @Backoff(delay = 1000, multiplier = 2))
+    public void handleUserSubscribedSimple(UserSubscribedToAlertEvent event) {
+        handleUserSubscribedInternal(event);
+    }
+
+    private void handleUserSubscribedInternal(UserSubscribedToAlertEvent event) {
         logger.info("Sync subscription to Redis for user: {}, alertId: {}",
                 event.user().getUsername(), event.alert().getId());
 
@@ -53,16 +63,23 @@ public class AlertDomainEventListener {
         logger.info("Subscription synced successfully for user: {}", user.getUsername());
     }
 
-    @Recover
-    public void recoverSubscriptionSync(DataAccessException e, UserSubscribedToAlertEvent event) {
-        logger.error("RECOVER: Failed to sync subscription for user {} after retries. Exception: {}",
-                event.user().getUsername(), e.getMessage());
+    @Async
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @ConditionalOnProperty(name = "spring.profiles.active", havingValue = "test", matchIfMissing = true)
+    @Retryable(retryFor = DataAccessException.class, maxAttempts = 4, backoff = @Backoff(delay = 1000, multiplier = 2))
+    public void handleUserUnsubscribedTransactional(UserUnsubscribedFromAlertEvent event) {
+        handleUserUnsubscribedInternal(event);
     }
 
     @Async
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @EventListener
+    @ConditionalOnProperty(name = "spring.profiles.active", havingValue = "test")
     @Retryable(retryFor = DataAccessException.class, maxAttempts = 4, backoff = @Backoff(delay = 1000, multiplier = 2))
-    public void handleUserUnsubscribed(UserUnsubscribedFromAlertEvent event) {
+    public void handleUserUnsubscribedSimple(UserUnsubscribedFromAlertEvent event) {
+        handleUserUnsubscribedInternal(event);
+    }
+
+    private void handleUserUnsubscribedInternal(UserUnsubscribedFromAlertEvent event) {
         logger.info("Sync unsubscription to Redis for user: {}, alertId: {}",
                 event.user().getUsername(), event.alert().getId());
 
@@ -79,6 +96,12 @@ public class AlertDomainEventListener {
         redisSortedSetService.removeElement(key, value);
 
         logger.info("Unsubscription synced successfully for user: {}", user.getUsername());
+    }
+
+    @Recover
+    public void recoverSubscriptionSync(DataAccessException e, UserSubscribedToAlertEvent event) {
+        logger.error("RECOVER: Failed to sync subscription for user {} after retries. Exception: {}",
+                event.user().getUsername(), e.getMessage());
     }
 
     @Recover

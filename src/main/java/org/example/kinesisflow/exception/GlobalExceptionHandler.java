@@ -20,16 +20,21 @@ public class GlobalExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    private ResponseEntity<Map<String, Object>> buildErrorResponse(String message, HttpStatus status, Map<String, Object> additionalFields) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("error", message);
+        response.put("timestamp", LocalDateTime.now());
+        response.put("status", status.value());
+        if (additionalFields != null) {
+            response.putAll(additionalFields);
+        }
+        return ResponseEntity.status(status).body(response);
+    }
+
     @ExceptionHandler(UserAlreadyExistsException.class)
     public ResponseEntity<Map<String, Object>> handleUserAlreadyExists(UserAlreadyExistsException ex) {
         logger.warn("User already exists: {}", ex.getMessage());
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("error", ex.getMessage());
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", HttpStatus.CONFLICT.value());
-
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+        return buildErrorResponse(ex.getMessage(), HttpStatus.CONFLICT, null);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -42,7 +47,7 @@ public class GlobalExceptionHandler {
             errors.put(error.getField(), error.getDefaultMessage());
         });
 
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+        return ResponseEntity.badRequest().body(errors);
     }
 
     @ExceptionHandler(BadCredentialsException.class)
@@ -58,49 +63,28 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleMalformedJson(HttpMessageNotReadableException ex) {
         logger.warn("Malformed JSON request: {}", ex.getMostSpecificCause().getMessage());
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("error", "Malformed JSON request");
-        response.put("details", ex.getMostSpecificCause().getMessage());
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", HttpStatus.BAD_REQUEST.value());
+        Map<String, Object> additionalFields = new HashMap<>();
+        additionalFields.put("details", ex.getMostSpecificCause().getMessage());
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        return buildErrorResponse("Malformed JSON request", HttpStatus.BAD_REQUEST, additionalFields);
     }
 
     @ExceptionHandler(AlertNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleAlertNotFound(AlertNotFoundException ex) {
         logger.warn("Alert not found: {}", ex.getMessage());
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("error", ex.getMessage());
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", HttpStatus.NOT_FOUND.value());
-
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        return buildErrorResponse(ex.getMessage(), HttpStatus.NOT_FOUND, null);
     }
 
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleUserNotFound(UserNotFoundException ex) {
         logger.warn("User not found: {}", ex.getMessage());
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("error", ex.getMessage());
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", HttpStatus.NOT_FOUND.value());
-
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        return buildErrorResponse(ex.getMessage(), HttpStatus.NOT_FOUND, null);
     }
 
     @ExceptionHandler(ConcurrentConflictException.class)
     public ResponseEntity<Map<String, Object>> handleConcurrentConflict(ConcurrentConflictException ex) {
         logger.warn("Concurrent conflict: {}", ex.getMessage());
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("error", ex.getMessage());
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", HttpStatus.CONFLICT.value());
-
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+        return buildErrorResponse(ex.getMessage(), HttpStatus.CONFLICT, null);
     }
 
     @ExceptionHandler(Exception.class)
@@ -120,12 +104,11 @@ public class GlobalExceptionHandler {
 
         logger.error("Unhandled exception occurred", ex);
 
-        Map<String, Object> error = new HashMap<>();
-        error.put("error", "Internal server error");
-        error.put("message", ex.getMessage());
-        error.put("timestamp", Instant.now().toString());
+        Map<String, Object> additionalFields = new HashMap<>();
+        additionalFields.put("message", ex.getMessage());
+        additionalFields.put("timestamp", Instant.now().toString()); // keep Instant format here for variety if desired
 
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        return buildErrorResponse("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR, additionalFields);
     }
 
 }

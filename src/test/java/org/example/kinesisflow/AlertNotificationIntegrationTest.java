@@ -392,7 +392,7 @@ class AlertNotificationIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(alertDTO)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("You have unsubscribed from alert succesfully"));
+                .andExpect(jsonPath("$.message").value("You have unsubscribed from alert successfully"));
 
         // Send events that would normally trigger alerts
         sendCryptoEvent(TEST_ASSET, new BigDecimal("49000"));
