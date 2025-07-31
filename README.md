@@ -39,7 +39,7 @@ The system is designed as a modular, event-driven monolith, ready to be evolved 
 | **Data Tier**     | PostgreSQL (Persistent Storage), Redis (High-Performance Caching & State)                                             |
 | **Architecture**  | Modular Monolith, Event-Driven, Cloud-Native, REST API, WebSockets                                                    |
 | **DevOps & Cloud**| Docker, **AWS** (ECS Fargate, EC2, RDS, ElastiCache, ALB), CI/CD with **GitHub Actions**,                             |
-| **Testing**       | JUnit 5, Mockito, **Testcontainers** (Integration Testing), **k6** (Load Testing)                                     |
+| **Testing**       | JUnit 5, Mockito, **Testcontainers** (Integration Testing), **k6** (Load Testing), SonarQube, Postman                 |
 | **Resilience**    | Kafka DLQ                                                                                                             |
 | **Observability** | **Micrometer**, **Prometheus**, **Grafana**                                                                           |
 
@@ -62,8 +62,7 @@ Extensive load testing was performed using **k6** to validate the system's perfo
 
 **Conclusions:**
 *   **High Efficiency:** A single instance demonstrated a very high processing throughput with sub-10ms internal latency.
-*   **Proven Horizontal Scalability:** Doubling the compute resources resulted in a **2.38x increase in processing capacity**, proving the effectiveness of the stateless, event-driven architecture.
-*   **Bottleneck Analysis:** The tests identified the single Kafka broker as the next bottleneck, validating the production architecture roadmap which includes migrating to a managed cluster like Amazon MSK.
+*   **Proven Horizontal Scalability:** Doubling the compute resources resulted in a **2.38x increase in processing capacity**(with double the load), proving the effectiveness of the stateless, event-driven architecture.
 
 ---
 
