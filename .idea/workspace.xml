@@ -4,11 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d483ce6d-440c-4168-a45c-3ac57b477076" name="Changes" comment="cleaning code, duplications ...">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/infrastructure/docker-compose.dev.yml" beforeDir="false" afterPath="$PROJECT_DIR$/infrastructure/docker-compose.dev.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/infrastructure/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/infrastructure/docker-compose.yml" afterDir="false" />
-    </list>
+    <list default="true" id="d483ce6d-440c-4168-a45c-3ac57b477076" name="Changes" comment="docker compose changes" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -403,15 +399,7 @@
       <workItem from="1753962366629" duration="3486000" />
       <workItem from="1753966448743" duration="1216000" />
       <workItem from="1753967685410" duration="125000" />
-      <workItem from="1753967833553" duration="3553000" />
-    </task>
-    <task id="LOCAL-00014" summary="refactorized kafka consumer and started implementing websockets for notification">
-      <option name="closed" value="true" />
-      <created>1752179985864</created>
-      <option name="number" value="00014" />
-      <option name="presentableId" value="LOCAL-00014" />
-      <option name="project" value="LOCAL" />
-      <updated>1752179985864</updated>
+      <workItem from="1753967833553" duration="3605000" />
     </task>
     <task id="LOCAL-00015" summary="implementing websockets and redis pub sub">
       <option name="closed" value="true" />
@@ -797,14 +785,32 @@
       <option name="project" value="LOCAL" />
       <updated>1753969030510</updated>
     </task>
-    <option name="localTasksCounter" value="63" />
+    <task id="LOCAL-00063" summary="docker compose changes">
+      <option name="closed" value="true" />
+      <created>1753975702756</created>
+      <option name="number" value="00063" />
+      <option name="presentableId" value="LOCAL-00063" />
+      <option name="project" value="LOCAL" />
+      <updated>1753975702756</updated>
+    </task>
+    <option name="localTasksCounter" value="64" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="completed the testing of the alert controller and the interaction with redis" />
     <MESSAGE value="changed the keys and values format, and added users suscription in redis" />
     <MESSAGE value="implemented the alert engine" />
     <MESSAGE value="solved bugs in tests. added message queues, idempotence and DLQ" />
@@ -829,7 +835,8 @@
     <MESSAGE value="fixing AlertNotificationIntegrationTest" />
     <MESSAGE value="added openapi documentation" />
     <MESSAGE value="cleaning code, duplications ..." />
-    <option name="LAST_COMMIT_MESSAGE" value="cleaning code, duplications ..." />
+    <MESSAGE value="docker compose changes" />
+    <option name="LAST_COMMIT_MESSAGE" value="docker compose changes" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
