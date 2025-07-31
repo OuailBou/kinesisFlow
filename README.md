@@ -90,15 +90,11 @@ The full REST API documentation is generated via OpenAPI 3 and is accessible thr
 **Steps:**
 1.  Clone the repository:
     ```bash
-    git clone https://github.com/your-username/kinesisflow.git
-    cd kinesisflow
+    git clone https://github.com/OuailBou/kinesisflow.git
+    cd kinesisflow/infrastructure
     ```
 2.  Start the local infrastructure (Kafka, Redis, PostgreSQL):
     ```bash
     docker-compose up -d
-    ```
-3.  Run the Spring Boot application:
-    ```bash
-    mvn spring-boot:run
     ```
 The application will be available at `http://localhost:8080`.
