@@ -74,7 +74,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-admin}
-      - JWT_SECRET=${JWT_SECRET:-QWxlcnQxMjM0NTY3ODlBQkNERUZHSElKS0xNTk8=}
+      - JWT_SECRET=${JWT_SECRET:-dGhpc2lzYXZlcnlzZWN1cmUzMmJ5dGVrZXlmb3Jqd3RzaWduaW5n}
     networks:
       - kinesisflow-network
     restart: unless-stopped

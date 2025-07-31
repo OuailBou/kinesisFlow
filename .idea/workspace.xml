@@ -400,14 +400,7 @@
       <workItem from="1753966448743" duration="1216000" />
       <workItem from="1753967685410" duration="125000" />
       <workItem from="1753967833553" duration="3605000" />
-    </task>
-    <task id="LOCAL-00015" summary="implementing websockets and redis pub sub">
-      <option name="closed" value="true" />
-      <created>1752246126496</created>
-      <option name="number" value="00015" />
-      <option name="presentableId" value="LOCAL-00015" />
-      <option name="project" value="LOCAL" />
-      <updated>1752246126496</updated>
+      <workItem from="1753977520118" duration="107000" />
     </task>
     <task id="LOCAL-00016" summary="implemented the pipeline">
       <option name="closed" value="true" />
@@ -793,7 +786,15 @@
       <option name="project" value="LOCAL" />
       <updated>1753975702756</updated>
     </task>
-    <option name="localTasksCounter" value="64" />
+    <task id="LOCAL-00064" summary="docker compose changes">
+      <option name="closed" value="true" />
+      <created>1753977591272</created>
+      <option name="number" value="00064" />
+      <option name="presentableId" value="LOCAL-00064" />
+      <option name="project" value="LOCAL" />
+      <updated>1753977591273</updated>
+    </task>
+    <option name="localTasksCounter" value="65" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
