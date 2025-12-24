@@ -25,7 +25,7 @@
         <appender-ref ref="Console"/>
     </root>
 
-    <logger name="org.example.kinesisflow" level="DEBUG" additivity="false">
+    <logger name="com.kinesisflow" level="DEBUG" additivity="false">
         <appender-ref ref="Console"/>
     </logger>
 </configuration>

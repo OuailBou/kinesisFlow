@@ -42,6 +42,7 @@ The system is designed as a modular, event-driven monolith, ready to be evolved 
 | Category          | Technologies & Concepts                                                                                               |
 | ----------------- | --------------------------------------------------------------------------------------------------------------------- |
 | **Backend**       | Java 21, Spring Boot 3, Spring Security (JWT)                                                                         |
+| **Frontend**      | **Vue 3**, **Vite**, **Tailwind CSS**, **Chart.js** (Real-time Dashboard)                                             |
 | **Messaging**     | Apache Kafka (Event Bus), Redis Pub/Sub (Real-time Notifications)                                                     |
 | **Data Tier**     | PostgreSQL (Persistent Storage), Redis (High-Performance Caching & State)                                             |
 | **Architecture**  | Modular Monolith, Event-Driven, Cloud-Native, REST API, WebSockets                                                    |
@@ -78,23 +79,40 @@ Extensive load testing was performed using **k6** to validate the system's perfo
 
 The full REST API documentation is generated via OpenAPI 3 and is accessible through a live Swagger UI.
 
-*   **Live Swagger UI:** `http://localhost:8080/swagger-ui/index.html#/`
+*   **Live Swagger UI:** `http://localhost:8081/swagger-ui/index.html#/`
 
 ---
 
 ### ⚙️ Running Locally
 
+The project includes a **Docker Compose** environment and a **Built-in Market Data Simulator** for easy testing.
+
 **Prerequisites:**
 *   Docker & Docker Compose
+*   Node.js 18+ (for frontend)
+*   Java 21 (for backend)
 
-**Steps:**
-1.  Clone the repository:
-    ```bash
-    git clone https://github.com/OuailBou/kinesisflow.git
-    cd kinesisflow/infrastructure
-    ```
-2.  Start the local infrastructure (Kafka, Redis, PostgreSQL):
-    ```bash
-    docker-compose up -d
-    ```
-The application will be available at `http://localhost:8080`.
+#### 1. Start Infrastructure
+```bash
+cd infrastructure
+docker-compose up -d
+```
+*Starts Kafka, Zookeeper, PostgreSQL, Redis, and Kafka UI.*
+
+#### 2. Run Backend (with Simulator)
+```bash
+./mvnw clean package -DskipTests
+java -jar target/kinesisFlow-0.0.1-SNAPSHOT.jar --spring.profiles.active=dev
+```
+*   **API:** `http://localhost:8081`
+*   **Simulator:** Automatically starts generating prices for BTC, ETH, SOL, ADA, DOT.
+
+#### 3. Run Frontend Dashboard
+```bash
+cd frontend
+npm install
+npm run dev
+```
+*   **Dashboard:** `http://localhost:5173`
+*   **Login:** Auto-generated demo credentials.
+*   **Features:** Real-time Chart (Events/Sec), Live Alert Feed, Auto-Reconnection.
