@@ -51,7 +51,12 @@
                         <span class="text-yellow-400 font-bold">{{ notif.asset || 'BTC' }}</span>
                         <span class="text-gray-300"> crossed </span>
                         <span class="text-white">{{ notif.price || '0.00' }}</span>
-                        <div class="text-gray-500 text-[10px] mt-1">{{ new Date().toLocaleTimeString() }}</div>
+                        <div class="flex justify-between items-center mt-1">
+                            <div class="text-gray-500 text-[10px]">{{ new Date().toLocaleTimeString() }}</div>
+                            <div class="text-green-400 text-[10px] font-mono">
+                                ⚡ {{ notif.latency }}ms
+                            </div>
+                        </div>
                     </li>
                 </ul>
             </div>
@@ -181,6 +186,10 @@ const connectWebSocket = (token) => {
     ws.onmessage = (event) => {
         try {
             const data = JSON.parse(event.data)
+            // Calculate latency ONCE upon arrival (Snapshot)
+            // Otherwise, it keeps increasing as "Time Since Creation"
+            data.latency = new Date().getTime() - (data.timestamp || new Date().getTime())
+
             notifications.value.unshift(data)
             if (notifications.value.length > 50) notifications.value.pop()
             eventCount.value++

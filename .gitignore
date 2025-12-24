@@ -4,14 +4,21 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+### Personal ###
+ROADMAP_2026.md
+
+### Logs ###
+*.log
+*.txt_generated
+
 ### STS ###
 .apt_generated
+.sts4-cache
 .classpath
 .factorypath
 .project
 .settings
 .springBeans
-.sts4-cache
 
 ### IntelliJ IDEA ###
 .idea
