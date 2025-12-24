@@ -1,64 +1,71 @@
 # KinesisFlow: Architectural Decision Records (ADRs)
 
-This document records the key architectural decisions made during the development of the KinesisFlow project. The goal is to provide context and justification for the chosen design patterns and technologies.
+This document summarizes the key architectural decisions I made while developing **KinesisFlow**. My goal here is to explain the reasoning behind the technologies and patterns I chose, and the context in which those decisions were made.
 
 ---
 
-### ADR-001: Choice of Event Bus - Apache Kafka
+## ADR-001: Choice of Event Bus – Apache Kafka
 
-**Context:**
-The system requires a mechanism for asynchronous communication between the data ingestion layer and the real-time processing engine. This is critical for decoupling services, handling back-pressure, and ensuring the durability of incoming market data. Alternatives considered were a traditional message broker like RabbitMQ or direct REST API calls.
+**Context:**  
+I needed a way for the data ingestion layer to communicate asynchronously with the real-time processing engine. This was crucial to decouple services, handle back-pressure, and avoid data loss. I considered using something like RabbitMQ or even basic REST calls, but they didn’t really fit the kind of stream processing I had in mind.
 
-**Decision:**
-We chose **Apache Kafka** as the central event bus for the real-time data pipeline.
+**Decision:**  
+I went with **Apache Kafka** as the main event bus for the real-time pipeline.
 
 **Justification:**
-1.  **Event-Driven Paradigm:** KinesisFlow is fundamentally an event streaming platform, not a task-based system. Kafka's log-centric model, where events are treated as an immutable, replayable stream of facts, is a perfect fit for this paradigm.
-2.  **Durability and Resilience:** Kafka's persistence to disk provides a strong durability guarantee. If a downstream consumer (like the `Alert Engine`) fails, the market data is safely stored in Kafka and can be processed upon recovery, preventing data loss.
-3.  **High Throughput & Scalability:** Kafka is designed for high-volume data streams. The use of **key-based partitioning** (using the asset symbol as the key) allows the system to process events for different assets in parallel across multiple consumer instances, while still guaranteeing in-order processing for any single asset. This is the foundation of the system's horizontal scalability.
-4.  **Ecosystem:** Kafka is the industry standard for event streaming and provides the foundation for future integration with advanced stream processing frameworks like Kafka Streams or Apache Flink.
+- **Event-first mindset:** KinesisFlow is built around events, not tasks. Kafka treats data as a stream of immutable, replayable events — exactly what I needed.
+- **Multiple consumers:** Kafka topics can be consumed by multiple independent consumers at the same time. This means I can use the same market data for different things — for example, running ML models, updating real-time dashboards, or writing to long-term storage — without interfering with the core alerting flow. That flexibility is super useful.
+
+- **Durability & fault-tolerance:** Kafka writes to disk, so if something like the `Alert Engine` goes down, it won’t lose any events. They’re still sitting in Kafka, ready to be processed.
+- **Scalability:** Kafka is designed to handle large-scale data. I used key-based partitioning (by asset symbol), which lets me scale horizontally while keeping event order per asset.
+- **Ecosystem & future-proofing:** Kafka is a widely adopted standard. If I ever need to upgrade the stream processing side, tools like Kafka Streams or Apache Flink are ready to plug in.
 
 ---
 
-### ADR-002: Caching Strategy - Redis for Low-Latency Alert Checking
+## ADR-002: Caching Strategy – Redis for Low-Latency Alert Checking
 
-**Context:**
-The `Alert Engine` needs to check each incoming market event against potentially millions of user-defined alert rules. Querying the primary PostgreSQL database for every event would introduce significant latency and create a massive performance bottleneck.
+**Context:**  
+The `Alert Engine` has to check every market event against potentially millions of user alerts. Querying the main PostgreSQL database on every event would’ve been way too slow and expensive.
 
-**Decision:**
-We implemented a **Cache-Aside** pattern using **Redis (Amazon ElastiCache)** as a low-latency, in-memory cache for active alert rules.
+**Decision:**  
+I implemented a **Cache-Aside** pattern using **Redis (via AWS ElastiCache)** to store active alert rules in memory.
 
 **Justification:**
-1.  **Performance:** Redis, as an in-memory datastore, provides sub-millisecond latency for read operations, which is critical for the real-time "hot path" of the `Alerting Engine`.
-2.  **Optimized Data Structures:** We leveraged Redis's advanced data structures for maximum efficiency. **Sorted Sets** are used to index alert rules by their price threshold (`score`). This allows the engine to query for all triggered alerts within a price range in a single, highly efficient `ZRANGEBYSCORE` operation, with a time complexity of O(log(N)+M).
-3.  **Database Protection:** The cache acts as a shield for the primary PostgreSQL database, absorbing the vast majority of the read load and reserving the database for its primary purpose: transactional writes and ensuring data integrity.
+- **Speed:** Redis reads are incredibly fast (sub-millisecond), which is perfect for real-time workflows.
+- **Smart data structures:** I used **Sorted Sets** in Redis to store alerts by price threshold (as the score). This lets me fetch all alerts in a price range using `ZRANGEBYSCORE`, which is efficient.
+- **Reduced DB load:** Redis takes care of most reads, so PostgreSQL is only used for writes and critical operations. This keeps the database happy and responsive.
 
 ---
 
-### ADR-003: Database-Cache Consistency Strategy - Domain Events
+## ADR-003: DB-Cache Consistency – Domain Events Pattern
 
-**Context:**
-Using a cache introduces the classic problem of keeping the cache synchronized with the source of truth (PostgreSQL). A simple "dual write" approach (writing to both PostgreSQL and Redis from the service layer) is prone to race conditions and inconsistencies if one of the writes fails.
+**Context:**  
+Keeping the cache in sync with the database is always tricky. I didn’t want to rely on writing to both the DB and Redis at the same time, since that can easily get out of sync if one write fails.
 
-**Decision:**
-We implemented a **Domain Events** pattern to ensure eventual consistency. The `AlertService` publishes events after a successful database transaction, and a separate, decoupled listener is responsible for updating the Redis cache.
+**Decision:**  
+I used a **Domain Events** pattern. After a successful DB transaction, I publish an event, and a separate listener updates Redis.
 
 **Justification:**
-1.  **Guaranteed Consistency:** By using Spring's `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)`, we ensure that the cache update logic is **only triggered if the primary database transaction succeeds**. This eliminates the risk of having data in the cache that was never successfully committed to the source of truth.
-2.  **Decoupling and Separation of Concerns:** The `AlertService` is now only responsible for business logic and database persistence. It has no knowledge of the caching implementation. The `CacheSyncListener` is solely responsible for the cache. This makes the system cleaner, more modular, and easier to maintain and extend.
-3.  **Resilience:** The listener is configured with an asynchronous, retryable policy (`@Async`, `@Retryable`). If Redis is temporarily unavailable, the system will re-attempt to synchronize the cache without blocking the main application thread or failing the user's original request.
+- **Consistency:** I used Spring’s `@TransactionalEventListener(phase = AFTER_COMMIT)` so the cache is only updated **after** the DB write is confirmed.
+- **Separation of concerns:** The `AlertService` handles DB logic only. A dedicated `CacheSyncListener` handles Redis updates. Cleaner and easier to maintain.
+- **Resilience:** The listener runs asynchronously (`@Async`) and retries on failure (`@Retryable`). If Redis is down, it doesn’t block the main app, and the cache update is retried later.
 
 ---
 
-### ADR-004: Deployment Strategy - Scalable Monolith & Cloud-Native Services
+## ADR-004: Deployment Strategy – Scalable Monolith & Cloud Services
 
-**Context:**
-The project needs a deployment strategy that is both pragmatic for an MVP and demonstrates readiness for a production environment. The architecture must be scalable and highly available.
+**Context:**  
+I needed a deployment setup that works for a Minimum Viable Product (MVP), but could also scale if needed. I didn’t want to over-engineer the infrastructure at this stage.
 
-**Decision:**
-We adopted a **hybrid cloud deployment model** on AWS. The core application is a **scalable, modular monolith** deployed on **AWS Fargate**, while stateful dependencies leverage managed services.
+**Decision:**  
+I used a **hybrid cloud setup** on **AWS**. The core app is a **modular monolith** running in **Fargate**, and all stateful components (like DB and cache) use managed services.
 
 **Justification:**
-1.  **Scalable Monolith:** Starting with a well-structured monolith allows for rapid development. By designing it to be **stateless** and organizing code into logical modules that communicate asynchronously (via Kafka and Domain Events), we ensure it can be **scaled horizontally** from day one. Load testing confirmed a 2.38x throughput increase when scaling from 1 to 2 instances.
-2.  **Managed Services for State:** We delegate the complexity of high availability for stateful components to AWS. **PostgreSQL runs on RDS** and **Redis on ElastiCache**, with a clear roadmap to enable **Multi-AZ** configurations for production-grade fault tolerance.
-3.  **Pragmatic Infrastructure for Kafka (SPoF Acknowledgment):** For this project's scope and cost constraints, Kafka is deployed on a single EC2 instance. We explicitly acknowledge this as a **Single Point of Failure**. The production architecture would migrate this to a managed, multi-broker cluster like **Amazon MSK** with a replication factor of 3 to ensure high availability. This decision demonstrates an understanding of production requirements and pragmatic trade-offs.
+- **Monolith with scaling in mind:** Starting with a stateless monolith was faster for development. Since it's modular and talks via Kafka and Domain Events, I can scale it horizontally. Load testing showed a 2.38x throughput boost going from 1 to 2 instances.
+- **Managed services for state:** PostgreSQL runs on **RDS**, and Redis on **ElastiCache**. This lets AWS handle availability, backups, and failover.
+- **Kafka: aware of limitations:** For now, Kafka is on a single EC2 instance (yes, it’s a **Single Point of Failure**). But I’m aware of the trade-off. In a real production setup, I’d move to **Amazon MSK** with a replication factor of 3. I made this choice consciously to stay within the project’s budget and scope.
+
+---
+
+📌 *Note: These ADRs reflect the current MVP version. I plan to revisit some of these decisions (especially around Kafka deployment) before moving to production.*
+
